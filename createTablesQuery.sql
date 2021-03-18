@@ -83,7 +83,8 @@ CREATE TABLE users_have_followers(
 	user_id INT NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id),
     following_user_id INT NOT NULL,
-    FOREIGN KEY(following_user_id) REFERENCES users(id)
+    FOREIGN KEY(following_user_id) REFERENCES users(id),
+    PRIMARY KEY(user_id, following_user_id)
 );
 
 CREATE TABLE songs_have_values(
