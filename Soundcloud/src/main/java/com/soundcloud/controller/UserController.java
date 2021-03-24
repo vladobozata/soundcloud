@@ -1,9 +1,6 @@
 package com.soundcloud.controller;
 
-import com.soundcloud.model.DTOs.LoginResponseUserDTO;
-import com.soundcloud.model.DTOs.LoginRequestUserDTO;
-import com.soundcloud.model.DTOs.RegisterRequestUserDTO;
-import com.soundcloud.model.DTOs.RegisterResponseUserDTO;
+import com.soundcloud.model.DTOs.*;
 import com.soundcloud.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,15 +11,18 @@ import javax.servlet.http.HttpSession;
 
 @RestController
 public class UserController extends AbstractController {
+    private final UserService userService;
 
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/login")
     public LoginResponseUserDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
-        LoginResponseUserDTO resposeDTO = this.userService.login(loginDTO);
-        session.setAttribute("LoggedUser", resposeDTO.getId());
-        return resposeDTO;
+        LoginResponseUserDTO responseDTO = this.userService.login(loginDTO);
+        session.setAttribute("LoggedUser", responseDTO.getId());
+        return responseDTO;
     }
 
     @PostMapping("/register")

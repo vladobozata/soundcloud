@@ -13,35 +13,63 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 public class UserService {
+    private static final String PASSWORD_PATTERN = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^*&+=]).{8,}";
+    private static final String EMAIL_PATTERN = "^[a-z]+[A-Za-z0-9_.-]{4,}+@[a-z]{2,6}+\\.[a-z]{2,5}";
+    private final UserRepository userRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-    public RegisterResponseUserDTO register(RegisterRequestUserDTO userDTO){
-        if(!userDTO.getPassword().equals(userDTO.getConfirmPassword())){
+    public RegisterResponseUserDTO register(RegisterRequestUserDTO registerDTO){
+        if(!validateEmail(registerDTO.getEmail())){
+            throw new BadRequestException("Email format is not correct!");
+        }
+        if(!validatePassword(registerDTO.getPassword())){
+            throw new BadRequestException("Password format is not correct!");
+        }
+        if(!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())){
             throw new BadRequestException("Passwords are not equals!");
         }
-        if(this.userRepository.findByEmail(userDTO.getEmail()) != null){
+        if(this.userRepository.findByEmail(registerDTO.getEmail()) != null){
             throw new BadRequestException("Email already exists!");
         }
-        if(this.userRepository.findByUsername(userDTO.getUsername()) != null){
+        if(this.userRepository.findByUsername(registerDTO.getUsername()) != null){
             throw new BadRequestException("Username already exists!");
         }
         PasswordEncoder encoder = new BCryptPasswordEncoder();
-        userDTO.setPassword(encoder.encode(userDTO.getPassword()));
+        registerDTO.setPassword(encoder.encode(registerDTO.getPassword()));
 
-        User user = new User(userDTO);
+        User user = new User(registerDTO);
         user = this.userRepository.save(user);
         return new RegisterResponseUserDTO(user);
+    }
+
+    private boolean validatePassword(String password){
+        Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+        Matcher matcher = pattern.matcher(password);
+
+        return matcher.matches();
+    }
+
+    private boolean validateEmail(String email){
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
+
+        return matcher.matches();
     }
 
 
     public LoginResponseUserDTO login(LoginRequestUserDTO loginDTO) {
         User user = this.userRepository.findByUsername(loginDTO.getUsername());
         if(user == null){
-            throw new AuthenticationException("Wrong credentials");
+            throw new AuthenticationException("Wrong credentials!");
         }
         else{
             PasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -49,7 +77,7 @@ public class UserService {
                 return new LoginResponseUserDTO(user);
             }
             else{
-                throw new AuthenticationException("Wrong credentials");
+                throw new AuthenticationException("Wrong credentials!");
             }
         }
     }

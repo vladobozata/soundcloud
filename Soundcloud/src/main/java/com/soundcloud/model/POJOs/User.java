@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,6 +26,19 @@ public class User {
     private String email;
     private int age;
     private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "comments")
+    private List<Comment> comments;
+    @OneToMany(mappedBy = "songs")
+    private List<Song> songs;
+
+    @ManyToMany
+    @JoinTable(name="users_have_followers",
+    joinColumns = {@JoinColumn(name = "followed_id")},
+    inverseJoinColumns = {@JoinColumn(name = "follower_id")})
+    private List<User> followed = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "followed")
+    private List<User> followers = new ArrayList<>();
 
     public User(RegisterRequestUserDTO userDTO) {
         this.username = userDTO.getUsername();
