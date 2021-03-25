@@ -1,6 +1,6 @@
 package com.soundcloud.model.DTOs;
 
-import com.soundcloud.model.POJOs.User;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,16 +10,11 @@ import org.springframework.stereotype.Component;
 @Setter
 @Component
 @NoArgsConstructor
-public class LoginResponseUserDTO {
+@AllArgsConstructor
+public class UpdateRequestUserDTO {
     private int id;
     private String username;
+    private String password;
     private String email;
     private int age;
-
-    public LoginResponseUserDTO(User user){
-        this.id =user.getId();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-        this.age = user.getAge();
-    }
 }

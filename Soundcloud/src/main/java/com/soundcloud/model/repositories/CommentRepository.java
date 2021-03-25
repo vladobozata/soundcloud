@@ -10,6 +10,5 @@ import java.util.ArrayList;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-    ArrayList<Comment> findByUserOrderByCreatedAtAsc(User user);
 
 }

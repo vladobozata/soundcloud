@@ -1,11 +1,11 @@
 package com.soundcloud.model.POJOs;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.soundcloud.model.DTOs.RegisterRequestUserDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,19 +26,31 @@ public class User {
     private String email;
     private int age;
     private LocalDateTime createdAt;
-    @OneToMany(mappedBy = "comments")
+    @OneToMany(mappedBy = "owner")
+    @JsonManagedReference
     private List<Comment> comments;
-    @OneToMany(mappedBy = "songs")
+    @OneToMany(mappedBy = "owner")
+    @JsonManagedReference
     private List<Song> songs;
+    @OneToMany(mappedBy = "owner")
+    @JsonManagedReference
+    private List<Playlist> playlists;
 
-    @ManyToMany
-    @JoinTable(name="users_have_followers",
-    joinColumns = {@JoinColumn(name = "followed_id")},
-    inverseJoinColumns = {@JoinColumn(name = "follower_id")})
-    private List<User> followed = new ArrayList<>();
+    @ManyToMany(mappedBy = "likers")
+    @JsonBackReference
+    private List<Comment> likedComments;
 
-    @ManyToMany(mappedBy = "followed")
-    private List<User> followers = new ArrayList<>();
+    @ManyToMany(mappedBy = "dislikers")
+    @JsonBackReference
+    private List<Comment> dislikedComments;
+
+    @ManyToMany(mappedBy = "likers")
+    @JsonBackReference
+    private List<Song> likedSongs;
+
+    @ManyToMany(mappedBy = "dislikers")
+    @JsonBackReference
+    private List<Song> dislikedSongs;
 
     public User(RegisterRequestUserDTO userDTO) {
         this.username = userDTO.getUsername();

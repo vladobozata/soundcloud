@@ -1,5 +1,6 @@
 package com.soundcloud.model.POJOs;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class Playlist {
     private String name;
     @ManyToOne
     @JoinColumn(name="owner_id")
-    private User user;
+    @JsonBackReference
+    private User owner;
     private LocalDateTime createdAt;
 }

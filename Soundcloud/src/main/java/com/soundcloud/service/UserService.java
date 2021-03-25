@@ -2,10 +2,7 @@ package com.soundcloud.service;
 
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
-import com.soundcloud.model.DTOs.LoginResponseUserDTO;
-import com.soundcloud.model.DTOs.LoginRequestUserDTO;
-import com.soundcloud.model.DTOs.RegisterRequestUserDTO;
-import com.soundcloud.model.DTOs.RegisterResponseUserDTO;
+import com.soundcloud.model.DTOs.*;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +24,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public RegisterResponseUserDTO register(RegisterRequestUserDTO registerDTO){
+    public UserDTO register(RegisterRequestUserDTO registerDTO){
         if(!validateEmail(registerDTO.getEmail())){
             throw new BadRequestException("Email format is not correct!");
         }
@@ -48,7 +45,7 @@ public class UserService {
 
         User user = new User(registerDTO);
         user = this.userRepository.save(user);
-        return new RegisterResponseUserDTO(user);
+        return new UserDTO(user);
     }
 
     private boolean validatePassword(String password){
@@ -66,7 +63,7 @@ public class UserService {
     }
 
 
-    public LoginResponseUserDTO login(LoginRequestUserDTO loginDTO) {
+    public UserDTO login(LoginRequestUserDTO loginDTO) {
         User user = this.userRepository.findByUsername(loginDTO.getUsername());
         if(user == null){
             throw new AuthenticationException("Wrong credentials!");
@@ -74,7 +71,7 @@ public class UserService {
         else{
             PasswordEncoder encoder = new BCryptPasswordEncoder();
             if(encoder.matches(loginDTO.getPassword(), user.getPassword())){
-                return new LoginResponseUserDTO(user);
+                return new UserDTO(user);
             }
             else{
                 throw new AuthenticationException("Wrong credentials!");
@@ -82,5 +79,27 @@ public class UserService {
         }
     }
 
+    public UserDTO userInformation(String username) {
+        return null;
+    }
 
+    public UserMessageDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
+        return null;
+    }
+
+    public UserProfileResponseDTO viewProfile(User loggedUser) {
+        return null;
+    }
+
+    public UnfollowResponseUserDTO unfollowUser(UnfollowRequestUserDTO unfollowDTO, User loggedUser) {
+        return null;
+    }
+
+    public FollowResponseUserDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
+        return null;
+    }
+
+    public UserMessageDTO removeProfile(User loggedUser) {
+        return null;
+    }
 }

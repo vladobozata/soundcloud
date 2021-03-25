@@ -1,16 +1,17 @@
 package com.soundcloud.model.DTOs;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-@NoArgsConstructor
 @Getter
 @Setter
 @Component
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginRequestUserDTO {
-
     private String username;
     private String password;
 }
