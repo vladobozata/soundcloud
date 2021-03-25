@@ -1,13 +1,13 @@
 ACTION MAP – soundcloud
 CONTROLLERS
+1. UserController – 12
 
-1. UserController – 11
-
-POST – 4
+POST – 5
 @/login (body – LoginDTO)
 @/logout (user from session)
 @/register (body – RegisterDTO)
 @/followuser/{user-ID} (user from session)
+@/filter-users (body -FilterUserRequestDTO)  -> List<UserResponseDTO> results
 
 DELETE – 2
 @/remove-user (user from session)
@@ -18,14 +18,7 @@ GET – 3
 * // Get all user information for the currently logged user
 @/users/{username}
 * // Get specific user and public information for their profile
-@/users
-* // Return list of all users with no parameters, or search using @/users?query=”USERNAME”
-* [https://@/users?sort-param=value] Returns list sorted by sort-param according to value (DESC/ASC)
-* @RequestParam(required = false) String query
-* @RequestParam(required = false) String byFollowers
-* @RequestParam(required = false) String bySongs
-* @RequestParam(required = false) String byComments
-* @RequestParam(required = false) String byKarma
+@/users/{username}/download-picture
 
 PUT – 2
 @/users/{username}/picture (body – binary image)
@@ -34,34 +27,24 @@ PUT – 2
 * Update user personal information
 
 
-
-
 2. SongController - 8
-
 POST – 1
 @/add-song (body – SongDTO, user from session) 
+@/filter-songs (body – FilterSongRequestDTO) -> List<SongResponseDTO> results
 
 DELETE – 1
-@/songs/{ID}/remove (user from session)
+@/songs/{ID} (user from session)
 
 GET – 5
-@/songs/{song-ID}/play
-* //Retrieve the mp3 file for the song 
 @/songs/{song-ID}
+* //Retrieve the mp3 file for the song 
+@/songs/{song-ID}/info
 * //Return information for {song-ID} 
 @/songs/liked (user from session)
 * //Return all liked songs for current user
-@/{username}/songs
+@/songs/{username}
 * //Return all songs for {username}
-@/songs
-* // Return list of all songs with no parameters
-* // Search using @/songs?query=”SONGNAME”&sort-param=VAL
-* // Sort using any sort parameter=value pair. ASC / DESC for sorting order
-* @RequestParam(required = false) String query
-* @RequestParam(required = false) String byComments
-* @RequestParam(required = false) String byLikes
-* @RequestParam(required = false) String byDislikes
-
+* 
 PUT – 1
 @/songs/{song-ID}/set-like-status?value=<1 / 0 / -1> (user from session)
 * // Set the current user’s like status for song {ID} according to the request parameter
@@ -73,21 +56,21 @@ PUT – 1
 
 
 
+
+
+
 3.CommentController - 5
-
 POST – 1
-@/songs/{song-ID}/add-comment (body – comment text, user from session) 
-
+@/comments
+> song-ID
+> comment body
 DELETE – 1
-@/comments/{comment-ID}/remove (user from session)
+@/comments/{comment-ID} (user from session)
 
 GET – 2
 @/songs/{song-ID}/comments
 @/comments/{comment-ID}
 
-Not needed:
-@comments/mostlikes 
-@comments/mostdislikes
 
 PUT – 1
 @/comments/{comment-ID }/set-like-status?value=<1 / 0 / -1> (user from session)
@@ -105,15 +88,16 @@ PUT – 1
 
 
 
-4.PlaylistController - 7
 
-POST – 2
-@/add-playlist (body – name, user from session)
-@/playlists/{playlist-ID}/add-song (body – song_id, user from session)
+
+
+4.PlaylistController - 7
+POST – 1
+@/playlists (body – name, user from session)
 
 DELETE – 2
-@/playlists/{playlist-ID}/remove-song (body – song_id, user from session)
-@/playlists/{playlist-ID}/delete-playlist (user from session)
+@/playlists/{playlist-ID}/songs/{song-ID} (user from session)
+@/playlists/{playlist-ID (user from session)
 
 GET – 3
 @/playlists
@@ -121,9 +105,22 @@ GET – 3
 @/playlists/{playlist-ID } 
 @/users/{username}/playlists
 * Return all playlists by user
+PUT - 1
+@/playlists/{playlist-ID}/songs/{song-ID} (user from session)
 
-Not needed: 
-@/playlists/mostsongs
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 DAOs
 1. UserDAO
@@ -140,3 +137,5 @@ DTOs
 2. RegisterDTO  (username, password, email, age)
 3. UpdateDTO (newPassword, newEmail, newAge, newCity) 
 4. SongDTO  (title, description, tags, binary song file)
+5. FilterUserDTO ( usernameQuery, bySongs, byComments, byFollowers) 
+6. 
