@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 public class UpdateRequestUserDTO {
     private int id;
     private String username;
-    private String password;
+    private String oldPassword;
+    private String newPassword;
+    private String confirmPassword;
     private String email;
     private int age;
 }

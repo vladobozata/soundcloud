@@ -22,7 +22,7 @@ public class SessionManager {
             return null;
         }
         int userId = (int) session.getAttribute(LOGGED_USER_ID);
-        return repository.findById(userId).get();
+        return this.repository.findById(userId);
     }
 
     public void loginUser(HttpSession ses, int id) {

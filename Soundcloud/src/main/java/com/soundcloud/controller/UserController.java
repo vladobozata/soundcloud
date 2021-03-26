@@ -59,7 +59,7 @@ public class UserController extends AbstractController {
         return this.userService.removeProfile(loggedUser);
     }
 
-    @DeleteMapping("/follow-user")
+    @PostMapping("/follow-user")
     public FollowResponseUserDTO unfollowUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session){
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser == null){
@@ -78,25 +78,25 @@ public class UserController extends AbstractController {
     }
 
     @GetMapping("/my-profile")
-    public UserProfileResponseDTO viewProfile(HttpSession session){
+    public MyProfileResponseDTO viewProfile(HttpSession session){
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser == null){
             throw new BadRequestException("You have to login and then view your profile!");
         }
-        return userService.viewProfile(loggedUser);
+        return this.userService.viewMyProfile(loggedUser);
     }
 
     @GetMapping("/users/{username}")
     public UserDTO userInformation(@PathVariable String username){
-        return userService.userInformation(username);
+        return this.userService.userInformation(username);
     }
 
-    @PutMapping("users/update-profile")
+    @PutMapping("/update-profile")
     public UserMessageDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session){
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser == null){
             throw new BadRequestException("You have to login and then update your profile!");
         }
-        return userService.updateProfile(updateDTO, loggedUser);
+        return this.userService.updateProfile(updateDTO, loggedUser);
     }
 }

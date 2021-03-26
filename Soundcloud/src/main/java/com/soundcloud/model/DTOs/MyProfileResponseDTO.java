@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileResponseDTO {
+public class MyProfileResponseDTO {
     private String username;
     private String email;
     private int age;
@@ -28,7 +28,7 @@ public class UserProfileResponseDTO {
     private List<Playlist> playlists;
     private List<Song> songs;
 
-    public UserProfileResponseDTO(User user) {
+    public MyProfileResponseDTO(User user) {
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.age = user.getAge();
