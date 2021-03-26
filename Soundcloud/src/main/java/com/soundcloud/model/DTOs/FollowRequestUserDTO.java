@@ -12,5 +12,5 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FollowRequestUserDTO {
-    private int userID;
+    private int ID;
 }

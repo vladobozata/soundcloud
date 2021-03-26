@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -51,6 +50,15 @@ public class User {
     @ManyToMany(mappedBy = "dislikers")
     @JsonBackReference
     private List<Song> dislikedSongs;
+
+//    @ManyToMany(cascade = CascadeType.ALL)
+//    @JoinTable(name="users_follow_users",
+//            joinColumns={@JoinColumn(name="followed_id")},
+//            inverseJoinColumns={@JoinColumn(name="follower_id")})
+//    private List<User> followed;
+//
+//    @ManyToMany(mappedBy = "followers")
+//    private List<User> followers;
 
     public User(RegisterRequestUserDTO userDTO) {
         this.username = userDTO.getUsername();

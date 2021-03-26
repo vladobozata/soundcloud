@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.sql.SQLException;
+
 public class AbstractController {
 
     @ExceptionHandler(BadRequestException.class)
@@ -22,9 +24,15 @@ public class AbstractController {
         return new ErrorDTO(e.getMessage());
     }
 
-    @ExceptionHandler()
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorDTO handleNotFoundResource(NotFoundException e){
+        return new ErrorDTO(e.getMessage());
+    }
+
+    @ExceptionHandler(SQLException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorDTO handleNotFoundResource(SQLException e){
         return new ErrorDTO(e.getMessage());
     }
 }

@@ -1,23 +1,28 @@
 package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.BadRequestException;
+import com.soundcloud.model.DAOs.UserDAO;
 import com.soundcloud.model.DTOs.*;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.UserService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.sql.SQLException;
 
 @RestController
 public class UserController extends AbstractController {
     private final UserService userService;
     private final SessionManager sessionManager;
+    private final UserDAO userDAO;
 
     @Autowired
-    public UserController(UserService userService, SessionManager sessionManager) {
+    public UserController(UserService userService, SessionManager sessionManager, UserDAO userDAO) {
         this.userService = userService;
         this.sessionManager = sessionManager;
+        this.userDAO = userDAO;
     }
 
     @PostMapping("/register")
@@ -56,25 +61,26 @@ public class UserController extends AbstractController {
         if(loggedUser == null){
             throw new BadRequestException("You have to login and then remove your profile!");
         }
-        return this.userService.removeProfile(loggedUser);
+        return this.userService.removeProfile(loggedUser.getId());
     }
 
+    @SneakyThrows
     @PostMapping("/follow-user")
-    public FollowResponseUserDTO unfollowUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session){
+    public FollowResponseUserDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser == null){
             throw new BadRequestException("You have to login and then follow users!");
         }
-        return this.userService.followUser(followDTO, loggedUser);
+        return this.userDAO.followUser(followDTO, loggedUser);
     }
 
     @DeleteMapping("/unfollow-user")
-    public UnfollowResponseUserDTO unfollowUser(@RequestBody UnfollowRequestUserDTO unfollowDTO, HttpSession session){
+    public FollowResponseUserDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) throws SQLException {
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser == null){
             throw new BadRequestException("You have to login and then unfollow users!");
         }
-        return this.userService.unfollowUser(unfollowDTO, loggedUser);
+        return this.userDAO.unfollowUser(unfollowDTO, loggedUser);
     }
 
     @GetMapping("/my-profile")
