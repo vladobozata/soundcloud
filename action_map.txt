@@ -27,6 +27,8 @@ PUT – 2
 * Update user personal information
 
 
+
+
 2. SongController - 8
 POST – 1
 @/add-song (body – SongDTO, user from session) 
@@ -56,9 +58,6 @@ PUT – 1
 
 
 
-
-
-
 3.CommentController - 5
 POST – 1
 @/comments
@@ -84,13 +83,6 @@ PUT – 1
 
 
 
-
-
-
-
-
-
-
 4.PlaylistController - 7
 POST – 1
 @/playlists (body – name, user from session)
@@ -107,15 +99,6 @@ GET – 3
 * Return all playlists by user
 PUT - 1
 @/playlists/{playlist-ID}/songs/{song-ID} (user from session)
-
-
-
-
-
-
-
-
-
 
 
 

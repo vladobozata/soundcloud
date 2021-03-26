@@ -21,7 +21,7 @@ public class Validator {
             if (!validateUsername(username)) {
                 throw new BadRequestException("Username format is not correct!");
             }
-            if (userRepository.findByUsername(username) != null) {
+            if (userRepository.findUserByUsername(username) != null) {
                 throw new BadRequestException("Username already exists!");
             }
             loggedUser.setUsername(username);

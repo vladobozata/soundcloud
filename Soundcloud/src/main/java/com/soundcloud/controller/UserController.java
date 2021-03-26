@@ -25,21 +25,22 @@ public class UserController extends AbstractController {
         this.userDAO = userDAO;
     }
 
-    @PostMapping("/register")
-    public UserDTO register(@RequestBody RegisterRequestUserDTO registerDTO, HttpSession session) {
+    private void validateUser(HttpSession session, String message){
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser != null){
-            throw new BadRequestException("You have to logout and then register again!");
+            throw new BadRequestException(message);
         }
+    }
+
+    @PostMapping("/register")
+    public UserDTO register(@RequestBody RegisterRequestUserDTO registerDTO, HttpSession session) {
+        validateUser(session, "You have to logout and then register again!");
         return this.userService.register(registerDTO);
     }
 
     @PostMapping("/login")
     public UserDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser != null){
-            throw new BadRequestException("You already logged in!");
-        }
+        validateUser(session, "You already logged in!");
         UserDTO responseDTO = this.userService.login(loginDTO);
         this.sessionManager.loginUser(session, responseDTO.getId());
         return responseDTO;

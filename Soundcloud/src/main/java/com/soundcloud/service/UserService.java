@@ -33,7 +33,7 @@ public class UserService {
         if (!Validator.validateEmail(registerDTO.getEmail())) {
             throw new BadRequestException("Email format is not correct!");
         }
-        if (this.userRepository.findByUsername(registerDTO.getUsername()) != null) {
+        if (this.userRepository.findUserByUsername(registerDTO.getUsername()) != null) {
             throw new BadRequestException("Username already exists!");
         }
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
@@ -51,7 +51,7 @@ public class UserService {
     }
 
     public UserDTO login(LoginRequestUserDTO loginDTO) {
-        User user = this.userRepository.findByUsername(loginDTO.getUsername());
+        User user = this.userRepository.findUserByUsername(loginDTO.getUsername());
         if (user == null) {
             throw new AuthenticationException("Wrong credentials!");
         }
