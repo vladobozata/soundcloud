@@ -24,7 +24,7 @@ public class UserService {
     }
 
     public UserDTO register(RegisterRequestUserDTO registerDTO) {
-        if (!Validator.validateUsername(registerDTO.getUsername())) {
+        if (!Validator.validateName(registerDTO.getUsername())) {
             throw new BadRequestException("Username format is not correct!");
         }
         if (!Validator.validatePassword(registerDTO.getPassword())) {
@@ -61,6 +61,42 @@ public class UserService {
         } else {
             throw new AuthenticationException("Wrong credentials!");
         }
+    }
+
+    public UserMessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
+        User user = this.userRepository.findUserById(followDTO.getUserID());
+        if (user == null) {
+            throw new NotFoundException("User not found!");
+        }
+        if(followDTO.getUserID() == loggedUser.getId()){
+            throw new BadRequestException("You can`t un/follow yourself!");
+        }
+        for (User follower : user.getFollowers()) {
+            if (follower.getId() == loggedUser.getId()) {
+                throw new BadRequestException("You already follow " + user.getUsername() + "!");
+            }
+        }
+        user.getFollowers().add(loggedUser);
+        this.userRepository.save(user);
+        return new UserMessageDTO("You successfully followed " + user.getUsername() + "!");
+    }
+
+    public UserMessageDTO unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
+        User user = this.userRepository.findUserById(followDTO.getUserID());
+        if (user == null) {
+            throw new NotFoundException("User not found!");
+        }
+        if(followDTO.getUserID() == loggedUser.getId()){
+            throw new BadRequestException("You can`t un/follow yourself!");
+        }
+        for(User follower : user.getFollowers()){
+            if(follower.getId() == loggedUser.getId()){
+                user.getFollowers().remove(loggedUser);
+                this.userRepository.save(user);
+                return new UserMessageDTO("You successfully unfollowed " + user.getUsername() + "!");
+            }
+        }
+        throw new BadRequestException("You do not follow " + user.getUsername() + "!");
     }
 
     public UserDTO userInformation(String username) {

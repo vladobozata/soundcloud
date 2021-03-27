@@ -7,12 +7,14 @@ import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.PlaylistResponseDTO;
 import com.soundcloud.model.DTOs.SongToPlaylistDTO;
+import com.soundcloud.model.DTOs.UpdatePlaylistNameDTO;
 import com.soundcloud.model.DTOs.UserMessageDTO;
 import com.soundcloud.model.POJOs.Playlist;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.PlaylistRepository;
 import com.soundcloud.model.repositories.SongRepository;
+import com.soundcloud.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,12 @@ public class PlaylistService {
     }
 
     public PlaylistResponseDTO addPlaylist(String name, User user) {
+        if (!Validator.validateName(name)) {
+            throw new BadRequestException("Playlist name format is not correct!");
+        }
+        if (this.playlistRepository.getPlaylistByName(name) != null) {
+            throw new BadRequestException("Playlist name already exists!");
+        }
         Playlist playlist = this.playlistRepository.save(new Playlist(name, user));
         return new PlaylistResponseDTO(playlist);
     }
@@ -123,5 +131,24 @@ public class PlaylistService {
             responsePlaylist.add(new PlaylistResponseDTO(playlist));
         }
         return responsePlaylist;
+    }
+
+    public UserMessageDTO updatePlaylistName(UpdatePlaylistNameDTO updateNameDTO, User loggedUser) {
+        Playlist playlist = this.playlistRepository.getPlaylistById(updateNameDTO.getPlaylistID());
+        if(playlist == null){
+            throw new NotFoundException("Playlist not found!");
+        }
+        if(playlist.getOwner().getId() != loggedUser.getId()){
+            throw new AuthenticationException("You can`t update foreign playlist!");
+        }
+        if (!Validator.validateName(updateNameDTO.getName())) {
+            throw new BadRequestException("Playlist name format is not correct!");
+        }
+        if (this.playlistRepository.getPlaylistByName(updateNameDTO.getName()) != null) {
+            throw new BadRequestException("Playlist name already exists!");
+        }
+        playlist.setName(updateNameDTO.getName());
+        this.playlistRepository.save(playlist);
+        return new UserMessageDTO("You successfully updated playlist name!");
     }
 }

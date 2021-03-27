@@ -21,26 +21,26 @@ public class UserDAO {
         this.repository = repository;
     }
 
-    public FollowResponseUserDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) throws SQLException {
+    public UserMessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) throws SQLException {
         String followQuery = "INSERT INTO users_follow_users(followed_id, follower_id) " +
                 "VALUES(?,?)";
 
         PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(followQuery);
-        pr.setInt(1, followDTO.getID());
+        pr.setInt(1, followDTO.getUserID());
         pr.setInt(2, loggedUser.getId());
         pr.executeUpdate();
         pr.close();
 
-        return new FollowResponseUserDTO("You successfully followed " + this.repository.findById(followDTO.getID()).getUsername());
+        return new UserMessageDTO("You successfully followed " + this.repository.findUserById(followDTO.getUserID()).getUsername());
     }
 
-    public FollowResponseUserDTO unfollowUser(FollowRequestUserDTO unfollowDTO, User loggedUser) throws SQLException {
+    public UserMessageDTO unfollowUser(FollowRequestUserDTO unfollowDTO, User loggedUser) throws SQLException {
         String unfollowQuery = "DELETE FROM users_follow_users WHERE followed_id = ? AND follower_id = ?";
         PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(unfollowQuery);
-        pr.setInt(1, unfollowDTO.getID());
+        pr.setInt(1, unfollowDTO.getUserID());
         pr.setInt(2, loggedUser.getId());
         pr.executeUpdate();
         pr.close();
-        return new FollowResponseUserDTO("You successfully unfollowed " + this.repository.findById(unfollowDTO.getID()).getUsername());
+        return new UserMessageDTO("You successfully unfollowed " + this.repository.findUserById(unfollowDTO.getUserID()).getUsername());
     }
 }

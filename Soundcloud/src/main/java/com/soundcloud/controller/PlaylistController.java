@@ -1,10 +1,7 @@
 package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.BadRequestException;
-import com.soundcloud.model.DTOs.AddPlaylistDTO;
-import com.soundcloud.model.DTOs.PlaylistResponseDTO;
-import com.soundcloud.model.DTOs.SongToPlaylistDTO;
-import com.soundcloud.model.DTOs.UserMessageDTO;
+import com.soundcloud.model.DTOs.*;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +55,15 @@ public class PlaylistController extends AbstractController{
             throw new BadRequestException("You have to login and then add a song to playlist!");
         }
         return this.playlistService.addSongToPlaylist(addSongDTO, loggedUser);
+    }
+
+    @PutMapping("/playlists/update-name")
+    public UserMessageDTO updatePlaylistName(@RequestBody UpdatePlaylistNameDTO updateNameDTO, HttpSession session){
+        User loggedUser = this.sessionManager.getLoggedUser(session);
+        if(loggedUser == null){
+            throw new BadRequestException("You have to login and then update your playlist!");
+        }
+        return this.playlistService.updatePlaylistName(updateNameDTO, loggedUser);
     }
 
     @GetMapping("/playlists/{playlistID}/songs")

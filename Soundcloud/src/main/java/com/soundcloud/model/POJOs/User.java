@@ -6,6 +6,8 @@ import com.soundcloud.model.DTOs.RegisterRequestUserDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -51,14 +53,16 @@ public class User {
     @JsonBackReference
     private List<Song> dislikedSongs;
 
-//    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-//    @JoinTable(name="users_follow_users",
-//            joinColumns={@JoinColumn(name="followed_id")},
-//            inverseJoinColumns={@JoinColumn(name="follower_id")})
-//    private List<User> followed;
-//
-//    @ManyToMany(mappedBy = "followers")
-//    private List<User> followers;
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinTable(name="users_follow_users",
+            joinColumns={@JoinColumn(name="followed_id")},
+            inverseJoinColumns={@JoinColumn(name="follower_id")})
+    @JsonManagedReference
+    private List<User> followers;
+
+    @ManyToMany(mappedBy = "followers")
+    @JsonBackReference
+    private List<User> followed;
 
     public User(RegisterRequestUserDTO userDTO) {
         this.username = userDTO.getUsername();

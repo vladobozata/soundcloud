@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class FollowRequestUserDTO {
-    private int userID;
+public class UpdatePlaylistNameDTO {
+    private int playlistID;
+    private String name;
 }

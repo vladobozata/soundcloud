@@ -18,7 +18,7 @@ public class Validator {
 
     public static void updateUsername(String username, User loggedUser) {
         if (!username.equals("")) {
-            if (!validateUsername(username)) {
+            if (!validateName(username)) {
                 throw new BadRequestException("Username format is not correct!");
             }
             if (userRepository.findUserByUsername(username) != null) {
@@ -56,7 +56,7 @@ public class Validator {
         }
     }
 
-    public static boolean validateUsername(String username) {
+    public static boolean validateName(String username) {
         Pattern pattern = Pattern.compile(USERNAME_PATTERN);
         Matcher matcher = pattern.matcher(username);
 
