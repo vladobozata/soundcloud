@@ -9,7 +9,5 @@ import java.util.*;
 
 @Repository
 public interface PlaylistRepository extends JpaRepository<Playlist, Integer> {
-
     Playlist getPlaylistById(int id);
-    Playlist getPlaylistBySongsContains(Song song);
 }

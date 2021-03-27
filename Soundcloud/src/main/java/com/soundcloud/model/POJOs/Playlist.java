@@ -26,11 +26,11 @@ public class Playlist {
     private User owner;
     private LocalDateTime createdAt;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(
             name = "playlists_have_songs",
             joinColumns = {@JoinColumn(name="playlist_id")},
-            inverseJoinColumns = {@JoinColumn(name="user_id")}
+            inverseJoinColumns = {@JoinColumn(name="song_id")}
     )
     @JsonManagedReference
     private List<Song> songs;
