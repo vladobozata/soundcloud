@@ -51,7 +51,7 @@ public class User {
     @JsonBackReference
     private List<Song> dislikedSongs;
 
-//    @ManyToMany(cascade = CascadeType.ALL)
+//    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 //    @JoinTable(name="users_follow_users",
 //            joinColumns={@JoinColumn(name="followed_id")},
 //            inverseJoinColumns={@JoinColumn(name="follower_id")})

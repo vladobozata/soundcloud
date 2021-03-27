@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @RestController
 public class PlaylistController extends AbstractController{
@@ -60,17 +61,17 @@ public class PlaylistController extends AbstractController{
     }
 
     @GetMapping("/playlists/{playlistID}/songs")
-    public SongToPlaylistDTO getPlaylistSongs(@PathVariable int playlistID){
+    public PlaylistResponseDTO getPlaylistSongs(@PathVariable int playlistID){
         return this.playlistService.getPlaylistSongs(playlistID);
     }
 
     @GetMapping("/users/{username}/playlists")
-    public PlaylistResponseDTO getUserPlaylists(@PathVariable String username){
+    public List<PlaylistResponseDTO> getUserPlaylists(@PathVariable String username){
         return this.playlistService.getUserPlaylist(username);
     }
 
     @GetMapping("/playlists")
-    public PlaylistResponseDTO getAllPlaylists(){
+    public List<PlaylistResponseDTO> getAllPlaylists(){
         return this.playlistService.getAllPlaylists();
     }
 }

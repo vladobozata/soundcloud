@@ -19,13 +19,13 @@ import java.util.List;
 @AllArgsConstructor
 public class PlaylistResponseDTO {
     private String name;
-    private User owner;
+    private String ownerName;
     private List<Song> songs;
     private LocalDateTime createdAt;
 
     public PlaylistResponseDTO(Playlist playlist){
         this.name = playlist.getName();
-        this.owner = playlist.getOwner();
+        this.ownerName = playlist.getOwner().getUsername();
         this.songs = playlist.getSongs();
         this.createdAt = LocalDateTime.now();
     }

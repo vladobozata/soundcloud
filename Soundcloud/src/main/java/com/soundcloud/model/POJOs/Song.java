@@ -26,13 +26,13 @@ public class Song {
     @JoinColumn(name = "owner_id")
     @JsonBackReference
     private User owner;
+    private LocalDateTime createdAt;
     @OneToMany(mappedBy = "song")
     @JsonManagedReference
     private List<Comment> comments;
     @ManyToMany(mappedBy = "songs")
     @JsonBackReference
     private List<Playlist> playlists;
-    private LocalDateTime createdAt;
 
     @ManyToMany
     @JoinTable(
