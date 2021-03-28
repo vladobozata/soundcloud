@@ -13,76 +13,93 @@ CREATE TABLE users(
 
 CREATE TABLE songs(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(100) NOT NULL,
+    title VARCHAR(100) NOT NULL UNIQUE,
     views INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT now(),
     url VARCHAR(100) NOT NULL,
     owner_id INT NOT NULL,
     FOREIGN KEY(owner_id) REFERENCES users(id)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE playlists(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	name VARCHAR(50) NOT NULL,
+	name VARCHAR(50) NOT NULL UNIQUE,
     owner_id INT NOT NULL,
-    FOREIGN KEY(owner_id) REFERENCES users(id),
+    FOREIGN KEY(owner_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     created_at DATETIME NOT NULL DEFAULT now()
+    
 );
 
 CREATE TABLE comments(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     text TEXT NOT NULL,
     owner_id INT NOT NULL,
-    FOREIGN KEY(owner_id) REFERENCES users(id),
+    FOREIGN KEY(owner_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     song_id INT NOT NULL,
-    FOREIGN KEY(song_id) REFERENCES songs(id),
+    FOREIGN KEY(song_id) REFERENCES songs(id)
+    ON DELETE CASCADE,
     created_at DATETIME NOT NULL DEFAULT now()
 );
 
 CREATE TABLE users_like_songs(
 	song_id INT NOT NULL,
-    FOREIGN KEY(song_id) REFERENCES songs(id),
+    FOREIGN KEY(song_id) REFERENCES songs(id)
+    ON DELETE CASCADE,
     user_id INT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     PRIMARY KEY(song_id, user_id)
 );
 
 CREATE TABLE users_dislike_songs(
 	song_id INT NOT NULL,
-    FOREIGN KEY(song_id) REFERENCES songs(id),
+    FOREIGN KEY(song_id) REFERENCES songs(id)
+    ON DELETE CASCADE,
     user_id INT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     PRIMARY KEY(song_id, user_id)
 );
 
 CREATE TABLE users_like_comments(
 	comment_id INT NOT NULL,
-    FOREIGN KEY(comment_id) REFERENCES comments(id),
+    FOREIGN KEY(comment_id) REFERENCES comments(id)
+    ON DELETE CASCADE,
     user_id INT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     PRIMARY KEY(comment_id, user_id)
 );
 
 CREATE TABLE users_dislike_comments(
 	comment_id INT NOT NULL,
-    FOREIGN KEY(comment_id) REFERENCES comments(id),
+    FOREIGN KEY(comment_id) REFERENCES comments(id)
+    ON DELETE CASCADE,
     user_id INT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     PRIMARY KEY(comment_id, user_id)
 );
 
 CREATE TABLE playlists_have_songs(
 	playlist_id INT NOT NULL,
-    FOREIGN KEY(playlist_id) REFERENCES playlists(id),
+    FOREIGN KEY(playlist_id) REFERENCES playlists(id)
+    ON DELETE CASCADE,
     song_id INT NOT NULL,
-    FOREIGN KEY(song_id) REFERENCES songs(id),
+    FOREIGN KEY(song_id) REFERENCES songs(id)
+    ON DELETE CASCADE,
     PRIMARY KEY(playlist_id, song_id)
 );
 
 CREATE TABLE users_follow_users(
 	followed_id INT NOT NULL,
-    FOREIGN KEY(followed_id) REFERENCES users(id),
+    FOREIGN KEY(followed_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     follower_id INT NOT NULL,
-    FOREIGN KEY(follower_id) REFERENCES users(id),
+    FOREIGN KEY(follower_id) REFERENCES users(id)
+    ON DELETE CASCADE,
     PRIMARY KEY(followed_id, follower_id)
 );
