@@ -1,6 +1,5 @@
 package com.soundcloud.controller;
 
-import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.model.DTOs.*;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.PlaylistService;
@@ -23,46 +22,31 @@ public class PlaylistController extends AbstractController{
 
     @PostMapping("/playlists")
     public PlaylistResponseDTO addPlaylist(@RequestBody AddPlaylistDTO playlistDTO, HttpSession session){
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser == null){
-            throw new BadRequestException("You have to login and then add a playlist!");
-        }
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then add a playlist!");
         return this.playlistService.addPlaylist(playlistDTO.getName(), loggedUser);
     }
 
     @DeleteMapping("/playlists/{playlistID}")
     public UserMessageDTO removePlaylist(@PathVariable int playlistID, HttpSession session){
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser == null){
-            throw new BadRequestException("You have to login and then remove a playlist!");
-        }
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove a playlist!");
         return this.playlistService.removePlaylist(playlistID, loggedUser);
     }
 
     @DeleteMapping("/playlists/songs")
     public UserMessageDTO removeSongFromPlaylist(@RequestBody SongToPlaylistDTO removeSongDTO, HttpSession session){
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser == null){
-            throw new BadRequestException("You have to login and then remove a song from playlist!");
-        }
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove a song from playlist!");
         return this.playlistService.removeSongFromPlaylist(removeSongDTO, loggedUser);
     }
 
     @PutMapping("/playlists/songs")
     public UserMessageDTO addSongToPlaylist(@RequestBody SongToPlaylistDTO addSongDTO, HttpSession session){
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser == null){
-            throw new BadRequestException("You have to login and then add a song to playlist!");
-        }
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then add a song to playlist!");
         return this.playlistService.addSongToPlaylist(addSongDTO, loggedUser);
     }
 
     @PutMapping("/playlists/update-name")
     public UserMessageDTO updatePlaylistName(@RequestBody UpdatePlaylistNameDTO updateNameDTO, HttpSession session){
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser == null){
-            throw new BadRequestException("You have to login and then update your playlist!");
-        }
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your playlist!");
         return this.playlistService.updatePlaylistName(updateNameDTO, loggedUser);
     }
 
