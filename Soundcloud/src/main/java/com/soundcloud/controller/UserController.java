@@ -54,7 +54,6 @@ public class UserController extends AbstractController {
         return this.userService.removeProfile(loggedUser.getId());
     }
 
-    @SneakyThrows
     @PostMapping("/follow-user")
     public UserMessageDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");

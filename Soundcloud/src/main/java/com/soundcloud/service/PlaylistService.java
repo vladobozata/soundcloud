@@ -74,7 +74,7 @@ public class PlaylistService {
                 }
             }
         }
-        throw new BadRequestException("The song is not in this playlist!");
+        throw new NotFoundException("Song not found!");
     }
 
     public UserMessageDTO addSongToPlaylist(SongToPlaylistDTO addSongDTO, User user) {

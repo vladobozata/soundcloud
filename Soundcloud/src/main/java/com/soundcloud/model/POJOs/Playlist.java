@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -33,7 +34,7 @@ public class Playlist {
             inverseJoinColumns = {@JoinColumn(name="song_id")}
     )
     @JsonManagedReference
-    private List<Song> songs;
+    private List<Song> songs = new ArrayList<>();
 
     public Playlist(String name, User owner){
         this.name = name;

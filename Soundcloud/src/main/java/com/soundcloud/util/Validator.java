@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class Validator {
     private static final String PASSWORD_PATTERN = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^*&+=]).{8,}";
     private static final String EMAIL_PATTERN = "^[a-z]+[A-Za-z0-9_.-]{4,}+@[a-z]{2,6}+\\.[a-z]{2,5}";
-    private static final String USERNAME_PATTERN = "^[A-Za-z]\\w{5,29}$";
+    private static final String USERNAME_PATTERN = "^[A-Za-z]\\w{3,29}$";
     public static UserRepository userRepository;
 
     public static void updateUsername(String username, User loggedUser) {

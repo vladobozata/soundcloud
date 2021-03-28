@@ -20,13 +20,13 @@ import java.util.List;
 public class PlaylistResponseDTO {
     private String name;
     private String ownerName;
-    private List<Song> songs;
     private LocalDateTime createdAt;
+    private List<Song> songs;
 
     public PlaylistResponseDTO(Playlist playlist){
         this.name = playlist.getName();
         this.ownerName = playlist.getOwner().getUsername();
+        this.createdAt = playlist.getCreatedAt();
         this.songs = playlist.getSongs();
-        this.createdAt = LocalDateTime.now();
     }
 }
