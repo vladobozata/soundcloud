@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @RestController
 public class SongController extends AbstractController {
@@ -64,5 +65,11 @@ public class SongController extends AbstractController {
     @SneakyThrows
     public byte[] playSong (@PathVariable int id) {
         return songService.playSong(id);
+    }
+
+    @GetMapping("songs/{username}")
+    @SneakyThrows
+    public List<SongGetResponseDTO> getByUsername(@PathVariable String username) {
+        return songService.getByUsername(username);
     }
 }

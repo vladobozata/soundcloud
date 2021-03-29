@@ -1,26 +1,32 @@
 package com.soundcloud.service;
 
+import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.FileWriteException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
+import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SongService {
     private static final String FILE_SAVE_DIR = "Soundcloud/src/main/java/com/soundcloud/assets";
     private static final String FILE_SAVE_FORMAT = ".mp3";
     private final SongRepository songRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public SongService(SongRepository songRepository) {
+    public SongService(SongRepository songRepository, UserRepository userRepository) {
         this.songRepository = songRepository;
+        this.userRepository = userRepository;
     }
 
     public Song uploadSong(String name, MultipartFile receivedFile, User loggedUser) {
@@ -78,5 +84,17 @@ public class SongService {
     public void deleteSong(int songId) {
         SongGetResponseDTO dto = new SongGetResponseDTO(getById(songId));
         songRepository.deleteById(songId);
+    }
+
+    public List<SongGetResponseDTO> getByUsername(String username) {
+        User owner = userRepository.findUserByUsername(username);
+        if(owner == null) throw new NotFoundException("Could not find user " + username);
+
+        List<Song> songs = songRepository.getAllByOwner(owner);
+
+        if(songs == null || songs.isEmpty()) throw new BadRequestException("This user doesn't have any songs.");
+
+        List<SongGetResponseDTO> response = songs.stream().map(SongGetResponseDTO::new).collect(Collectors.toList());
+        return response;
     }
 }
