@@ -24,6 +24,12 @@ public class UserService {
         Validator.userRepository = this.userRepository;
     }
 
+    public void validateUser(User user){
+        if (user == null) {
+            throw new NotFoundException("User not found!");
+        }
+    }
+
     public UserDTO register(RegisterRequestUserDTO registerDTO) {
         if (!Validator.validateName(registerDTO.getUsername())) {
             throw new BadRequestException("Username format is not correct!");
@@ -66,9 +72,7 @@ public class UserService {
 
     public MessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
-        if (user == null) {
-            throw new NotFoundException("User not found!");
-        }
+        validateUser(user);
         if (followDTO.getUserID() == loggedUser.getId()) {
             throw new BadRequestException("You can`t un/follow yourself!");
         }
@@ -82,9 +86,7 @@ public class UserService {
 
     public MessageDTO unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
-        if (user == null) {
-            throw new NotFoundException("User not found!");
-        }
+        validateUser(user);
         if (followDTO.getUserID() == loggedUser.getId()) {
             throw new BadRequestException("You can`t un/follow yourself!");
         }
@@ -98,9 +100,7 @@ public class UserService {
 
     public UserDTO userInformation(String username) {
         User user = this.userRepository.findUserByUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User with this username not found!");
-        }
+        validateUser(user);
         return new UserDTO(user);
     }
 

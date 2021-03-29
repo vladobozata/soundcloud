@@ -21,7 +21,7 @@ public class UserController extends AbstractController {
         this.sessionManager = sessionManager;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     public UserDTO register(@RequestBody RegisterRequestUserDTO registerDTO, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser != null){
@@ -30,7 +30,7 @@ public class UserController extends AbstractController {
         return this.userService.register(registerDTO);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public UserDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if(loggedUser != null){
@@ -41,38 +41,38 @@ public class UserController extends AbstractController {
         return responseDTO;
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/users/logout")
     public MessageDTO logout(HttpSession session){
         this.sessionManager.validateUser(session, "You have to login and then logout!");
         this.sessionManager.logoutUser(session);
         return new MessageDTO("You successfully logout!");
     }
 
-    @DeleteMapping("/remove-profile")
+    @DeleteMapping("/users/remove-profile")
     public MessageDTO removeProfile(HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove your profile!");
         return this.userService.removeProfile(loggedUser.getId());
     }
 
-    @PostMapping("/follow-user")
+    @PostMapping("/users/follow-user")
     public MessageDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
         return this.userService.followUser(followDTO, loggedUser);
     }
 
-    @DeleteMapping("/unfollow-user")
+    @DeleteMapping("/users/unfollow-user")
     public MessageDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
         return this.userService.unfollowUser(unfollowDTO, loggedUser);
     }
 
-    @PutMapping("/update-profile")
+    @PutMapping("/users/update-profile")
     public MessageDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your profile!");
         return this.userService.updateProfile(updateDTO, loggedUser);
     }
 
-    @GetMapping("/my-profile")
+    @GetMapping("/users/my-profile")
     public MyProfileResponseDTO viewProfile(HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then view your profile!");
         return this.userService.viewMyProfile(loggedUser);
