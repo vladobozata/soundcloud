@@ -10,12 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.time.LocalDateTime;
 
 @Service
 public class SongService {
+    private final SongRepository songRepository;
+
     @Autowired
-    private SongRepository repo;
+    public SongService(SongRepository repo) {
+        this.songRepository = repo;
+    }
 
     public Song uploadSong(String name, MultipartFile receivedFile, User loggedUser) {
         File localFile = new File("Soundcloud/src/main/java/com/soundcloud/assets",  System.currentTimeMillis() + ".mp3");
@@ -33,16 +36,13 @@ public class SongService {
         } catch (IOException e) {
             throw new FileWriteException("Could not save song to server - " + e.getMessage());
         }
-
         Song song = new Song(name, localFile.getPath(), loggedUser);
-
-        repo.save(song);
-
+        songRepository.save(song);
         return song;
     }
 
     public Song getById(int id) {
-        Song s = repo.findById(id);
+        Song s = songRepository.getSongById(id);
         if (s == null)  {
             throw new NotFoundException("User with id " + id + " not found.");
         } else {
@@ -53,7 +53,7 @@ public class SongService {
     public byte[] playSong(int id) {
         Song s = getById(id);
         s.setViews(s.getViews()+1);
-        repo.save(s);
+        songRepository.save(s);
         File songFile = new File(s.getUrl());
         byte[] array = new byte[(int) songFile.length()];
         try {

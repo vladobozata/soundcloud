@@ -49,7 +49,7 @@ public class Validator {
             if (!validateEmail(email)) {
                 throw new BadRequestException("Email format is not correct!");
             }
-            if (userRepository.findByEmail(email) != null) {
+            if (userRepository.findUserByEmail(email) != null) {
                 throw new BadRequestException("Email already exists!");
             }
             loggedUser.setEmail(email);

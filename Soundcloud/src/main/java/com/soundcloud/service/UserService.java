@@ -39,7 +39,7 @@ public class UserService {
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
             throw new BadRequestException("Passwords are not equals!");
         }
-        if (this.userRepository.findByEmail(registerDTO.getEmail()) != null) {
+        if (this.userRepository.findUserByEmail(registerDTO.getEmail()) != null) {
             throw new BadRequestException("Email already exists!");
         }
         PasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -125,7 +125,7 @@ public class UserService {
 
     @Transactional
     public UserMessageDTO removeProfile(int userID) {
-        this.userRepository.deleteById(userID);
+        this.userRepository.deleteUserById(userID);
         return new UserMessageDTO("Your profile was removed!");
     }
 }

@@ -61,11 +61,6 @@ public class PlaylistController extends AbstractController{
 
     @GetMapping("/users/{username}/playlists")
     public List<PlaylistResponseDTO> getUserPlaylists(@PathVariable String username){
-        return this.playlistService.getUserPlaylist(username);
-    }
-
-    @GetMapping("/playlists")
-    public List<PlaylistResponseDTO> getAllPlaylists(){
-        return this.playlistService.getAllPlaylists();
+        return this.playlistService.getUserPlaylists(username);
     }
 }
