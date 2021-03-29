@@ -1,4 +1,4 @@
-package com.soundcloud.model.DTOs;
+package com.soundcloud.model.DTOs.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class FollowRequestUserDTO {
-    private int userID;
+public class UserMessageDTO {
+    private String responseMessage;
 }

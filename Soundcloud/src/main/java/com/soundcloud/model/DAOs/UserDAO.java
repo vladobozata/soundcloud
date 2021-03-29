@@ -1,6 +1,7 @@
 package com.soundcloud.model.DAOs;
 
-import com.soundcloud.model.DTOs.*;
+import com.soundcloud.model.DTOs.User.FollowRequestUserDTO;
+import com.soundcloud.model.DTOs.User.UserMessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

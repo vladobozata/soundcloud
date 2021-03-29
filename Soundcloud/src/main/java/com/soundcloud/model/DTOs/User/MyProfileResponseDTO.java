@@ -1,4 +1,4 @@
-package com.soundcloud.model.DTOs;
+package com.soundcloud.model.DTOs.User;
 
 import com.soundcloud.model.POJOs.Comment;
 import com.soundcloud.model.POJOs.Playlist;

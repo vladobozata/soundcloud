@@ -51,4 +51,12 @@ public class Song {
     )
     @JsonManagedReference
     List<User> dislikers;
+
+    public Song(String title, String url, User owner) {
+        this.title = title;
+        this.url = url;
+        this.views = 0;
+        this.owner = owner;
+        this.createdAt = LocalDateTime.now();
+    }
 }

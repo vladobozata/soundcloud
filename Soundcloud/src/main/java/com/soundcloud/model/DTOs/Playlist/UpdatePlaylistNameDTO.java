@@ -1,4 +1,4 @@
-package com.soundcloud.model.DTOs;
+package com.soundcloud.model.DTOs.Playlist;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,10 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequestUserDTO {
-    private String username;
-    private String password;
-    private String confirmPassword;
-    private String email;
-    private int age;
+public class UpdatePlaylistNameDTO {
+    private int playlistID;
+    private String name;
 }

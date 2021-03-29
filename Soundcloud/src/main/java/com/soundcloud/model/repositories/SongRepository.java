@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, Integer> {
-
+    Song findById(int id);
 }

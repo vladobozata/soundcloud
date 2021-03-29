@@ -1,6 +1,10 @@
 package com.soundcloud.controller;
 
-import com.soundcloud.model.DTOs.*;
+import com.soundcloud.model.DTOs.Playlist.AddPlaylistDTO;
+import com.soundcloud.model.DTOs.Playlist.PlaylistResponseDTO;
+import com.soundcloud.model.DTOs.Playlist.SongToPlaylistDTO;
+import com.soundcloud.model.DTOs.Playlist.UpdatePlaylistNameDTO;
+import com.soundcloud.model.DTOs.User.UserMessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;

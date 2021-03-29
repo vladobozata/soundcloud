@@ -3,7 +3,7 @@ package com.soundcloud.service;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
-import com.soundcloud.model.DTOs.*;
+import com.soundcloud.model.DTOs.User.*;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;

@@ -1,7 +1,7 @@
 package com.soundcloud.util;
 
 import com.soundcloud.exceptions.BadRequestException;
-import com.soundcloud.model.DTOs.UpdateRequestUserDTO;
+import com.soundcloud.model.DTOs.User.UpdateRequestUserDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
