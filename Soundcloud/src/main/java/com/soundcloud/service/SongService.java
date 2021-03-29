@@ -16,8 +16,8 @@ public class SongService {
     private final SongRepository songRepository;
 
     @Autowired
-    public SongService(SongRepository repo) {
-        this.songRepository = repo;
+    public SongService(SongRepository songRepository) {
+        this.songRepository = songRepository;
     }
 
     public Song uploadSong(String name, MultipartFile receivedFile, User loggedUser) {
@@ -54,6 +54,7 @@ public class SongService {
         Song s = getById(id);
         s.setViews(s.getViews()+1);
         songRepository.save(s);
+
         File songFile = new File(s.getUrl());
         byte[] array = new byte[(int) songFile.length()];
         try {

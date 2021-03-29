@@ -16,10 +16,14 @@ import java.net.http.HttpResponse;
 
 @RestController
 public class SongController extends AbstractController {
+    private final SessionManager sessionManager;
+    private final SongService service;
+
     @Autowired
-    private SessionManager sessionManager;
-    @Autowired
-    private SongService service;
+    public SongController(SongService service, SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+        this.service = service;
+    }
 
     @PostMapping("/songs")
     @SneakyThrows
