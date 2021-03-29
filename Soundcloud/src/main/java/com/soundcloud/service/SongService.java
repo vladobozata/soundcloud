@@ -13,6 +13,8 @@ import java.io.*;
 
 @Service
 public class SongService {
+    private static final String FILE_SAVE_DIR = "Soundcloud/src/main/java/com/soundcloud/assets";
+    private static final String FILE_SAVE_FORMAT = ".mp3";
     private final SongRepository songRepository;
 
     @Autowired
@@ -21,7 +23,7 @@ public class SongService {
     }
 
     public Song uploadSong(String name, MultipartFile receivedFile, User loggedUser) {
-        File localFile = new File("Soundcloud/src/main/java/com/soundcloud/assets",  System.currentTimeMillis() + ".mp3");
+        File localFile = new File(FILE_SAVE_DIR,  System.nanoTime() + FILE_SAVE_FORMAT);
         System.out.println(localFile.getAbsolutePath());
 
         try {
