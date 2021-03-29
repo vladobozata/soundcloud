@@ -1,6 +1,5 @@
 package com.soundcloud.controller;
 
-import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
@@ -11,7 +10,6 @@ import com.soundcloud.service.SongService;
 import com.soundcloud.service.UserService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -71,5 +69,12 @@ public class SongController extends AbstractController {
     @SneakyThrows
     public List<SongGetResponseDTO> getByUsername(@PathVariable String username) {
         return songService.getByUsername(username);
+    }
+
+    @GetMapping("songs/liked")
+    @SneakyThrows
+    public List<SongGetResponseDTO> getLikedSongs(HttpSession session) {
+        User loggedUser = sessionManager.validateUser(session, "You must login to see your liked songs.");
+        return songService.getLikedByUser(loggedUser);
     }
 }

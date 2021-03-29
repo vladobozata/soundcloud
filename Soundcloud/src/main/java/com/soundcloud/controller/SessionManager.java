@@ -1,6 +1,7 @@
 package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.BadRequestException;
+import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class SessionManager {
     public User validateUser(HttpSession session, String message){
         User loggedUser = getLoggedUser(session);
         if(loggedUser == null){
-            throw new BadRequestException(message);
+            throw new AuthenticationException(message);
         }
         return loggedUser;
     }

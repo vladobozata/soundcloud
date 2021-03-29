@@ -97,4 +97,9 @@ public class SongService {
         List<SongGetResponseDTO> response = songs.stream().map(SongGetResponseDTO::new).collect(Collectors.toList());
         return response;
     }
+
+    public List<SongGetResponseDTO> getLikedByUser(User likedUser) {
+        List<Song> songs = songRepository.getAllByLikersContaining(likedUser);
+        return songs.stream().map(SongGetResponseDTO::new).collect(Collectors.toList());
+    }
 }
