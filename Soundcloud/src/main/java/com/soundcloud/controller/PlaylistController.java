@@ -4,7 +4,7 @@ import com.soundcloud.model.DTOs.Playlist.AddPlaylistDTO;
 import com.soundcloud.model.DTOs.Playlist.PlaylistResponseDTO;
 import com.soundcloud.model.DTOs.Playlist.SongToPlaylistDTO;
 import com.soundcloud.model.DTOs.Playlist.UpdatePlaylistNameDTO;
-import com.soundcloud.model.DTOs.User.UserMessageDTO;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,25 +31,25 @@ public class PlaylistController extends AbstractController{
     }
 
     @DeleteMapping("/playlists/{playlistID}")
-    public UserMessageDTO removePlaylist(@PathVariable int playlistID, HttpSession session){
+    public MessageDTO removePlaylist(@PathVariable int playlistID, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove a playlist!");
         return this.playlistService.removePlaylist(playlistID, loggedUser);
     }
 
     @DeleteMapping("/playlists/songs")
-    public UserMessageDTO removeSongFromPlaylist(@RequestBody SongToPlaylistDTO removeSongDTO, HttpSession session){
+    public MessageDTO removeSongFromPlaylist(@RequestBody SongToPlaylistDTO removeSongDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove a song from playlist!");
         return this.playlistService.removeSongFromPlaylist(removeSongDTO, loggedUser);
     }
 
     @PutMapping("/playlists/songs")
-    public UserMessageDTO addSongToPlaylist(@RequestBody SongToPlaylistDTO addSongDTO, HttpSession session){
+    public MessageDTO addSongToPlaylist(@RequestBody SongToPlaylistDTO addSongDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then add a song to playlist!");
         return this.playlistService.addSongToPlaylist(addSongDTO, loggedUser);
     }
 
     @PutMapping("/playlists/update-name")
-    public UserMessageDTO updatePlaylistName(@RequestBody UpdatePlaylistNameDTO updateNameDTO, HttpSession session){
+    public MessageDTO updatePlaylistName(@RequestBody UpdatePlaylistNameDTO updateNameDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your playlist!");
         return this.playlistService.updatePlaylistName(updateNameDTO, loggedUser);
     }

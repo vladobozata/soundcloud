@@ -8,7 +8,7 @@ import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.Playlist.PlaylistResponseDTO;
 import com.soundcloud.model.DTOs.Playlist.SongToPlaylistDTO;
 import com.soundcloud.model.DTOs.Playlist.UpdatePlaylistNameDTO;
-import com.soundcloud.model.DTOs.User.UserMessageDTO;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.Playlist;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
@@ -48,17 +48,17 @@ public class PlaylistService {
     }
 
     @Transactional
-    public UserMessageDTO removePlaylist(int playlistID, User user) {
+    public MessageDTO removePlaylist(int playlistID, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(playlistID);
         validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
             throw new AuthenticationException("You can`t remove foreign playlist!");
         }
         this.playlistRepository.deleteById(playlistID);
-        return new UserMessageDTO("The playlist was successfully removed!");
+        return new MessageDTO("The playlist was successfully removed!");
     }
 
-    public UserMessageDTO removeSongFromPlaylist(SongToPlaylistDTO removeSongDTO, User user) {
+    public MessageDTO removeSongFromPlaylist(SongToPlaylistDTO removeSongDTO, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(removeSongDTO.getPlaylistID());
         validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
@@ -70,10 +70,10 @@ public class PlaylistService {
         }
         playlist.getSongs().remove(song);
         this.playlistRepository.save(playlist);
-        return new UserMessageDTO("The song was successfully removed from your playlist!");
+        return new MessageDTO("The song was successfully removed from your playlist!");
     }
 
-    public UserMessageDTO addSongToPlaylist(SongToPlaylistDTO addSongDTO, User user) {
+    public MessageDTO addSongToPlaylist(SongToPlaylistDTO addSongDTO, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(addSongDTO.getPlaylistID());
         validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
@@ -88,7 +88,7 @@ public class PlaylistService {
         }
         playlist.getSongs().add(song);
         this.playlistRepository.save(playlist);
-        return new UserMessageDTO("The song was successfully added to your playlist!");
+        return new MessageDTO("The song was successfully added to your playlist!");
     }
 
     public PlaylistResponseDTO getPlaylistSongs(int playlistID) {
@@ -109,7 +109,7 @@ public class PlaylistService {
         return responsePlaylist;
     }
 
-    public UserMessageDTO updatePlaylistName(UpdatePlaylistNameDTO updateNameDTO, User loggedUser) {
+    public MessageDTO updatePlaylistName(UpdatePlaylistNameDTO updateNameDTO, User loggedUser) {
         Playlist playlist = this.playlistRepository.getPlaylistById(updateNameDTO.getPlaylistID());
         validatePlaylist(playlist);
         if (playlist.getOwner().getId() != loggedUser.getId()) {
@@ -123,6 +123,6 @@ public class PlaylistService {
         }
         playlist.setName(updateNameDTO.getName());
         this.playlistRepository.save(playlist);
-        return new UserMessageDTO("You successfully updated playlist name!");
+        return new MessageDTO("You successfully updated playlist name!");
     }
 }

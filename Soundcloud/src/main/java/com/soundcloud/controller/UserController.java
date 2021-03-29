@@ -2,6 +2,7 @@ package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.model.DTOs.User.*;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,32 +42,32 @@ public class UserController extends AbstractController {
     }
 
     @PostMapping("/logout")
-    public UserMessageDTO logout(HttpSession session){
+    public MessageDTO logout(HttpSession session){
         this.sessionManager.validateUser(session, "You have to login and then logout!");
         this.sessionManager.logoutUser(session);
-        return new UserMessageDTO("You successfully logout!");
+        return new MessageDTO("You successfully logout!");
     }
 
     @DeleteMapping("/remove-profile")
-    public UserMessageDTO removeProfile(HttpSession session){
+    public MessageDTO removeProfile(HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove your profile!");
         return this.userService.removeProfile(loggedUser.getId());
     }
 
     @PostMapping("/follow-user")
-    public UserMessageDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
+    public MessageDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
         return this.userService.followUser(followDTO, loggedUser);
     }
 
     @DeleteMapping("/unfollow-user")
-    public UserMessageDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
+    public MessageDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
         return this.userService.unfollowUser(unfollowDTO, loggedUser);
     }
 
     @PutMapping("/update-profile")
-    public UserMessageDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session){
+    public MessageDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your profile!");
         return this.userService.updateProfile(updateDTO, loggedUser);
     }

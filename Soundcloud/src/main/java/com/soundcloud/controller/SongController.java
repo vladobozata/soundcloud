@@ -1,48 +1,68 @@
 package com.soundcloud.controller;
 
+import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
+import com.soundcloud.exceptions.AuthenticationException;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
 import com.soundcloud.model.DTOs.Song.SongUploadResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.SongService;
+import com.soundcloud.service.UserService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.net.http.HttpResponse;
 
 @RestController
 public class SongController extends AbstractController {
     private final SessionManager sessionManager;
-    private final SongService service;
+    private final SongService songService;
+    private final UserService userService;
 
     @Autowired
-    public SongController(SongService service, SessionManager sessionManager) {
+    public SongController(SongService songService, UserService userService, SessionManager sessionManager) {
         this.sessionManager = sessionManager;
-        this.service = service;
+        this.songService = songService;
+        this.userService = userService;
     }
 
     @PostMapping("/songs")
     @SneakyThrows
     public SongUploadResponseDTO upload (@RequestPart MultipartFile file, @RequestPart String name, HttpSession session) {
         User loggedUser = sessionManager.validateUser(session, "You must login to upload a song.");
-        Song uploadedSong = service.uploadSong(name, file, loggedUser);
+        Song uploadedSong = songService.uploadSong(name, file, loggedUser);
         return new SongUploadResponseDTO(uploadedSong);
+    }
+
+    @DeleteMapping("/songs/{id}")
+    @SneakyThrows
+    public MessageDTO delete(@PathVariable int id, HttpSession session, HttpServletResponse res) {
+        User loggedUser = sessionManager.getLoggedUser(session);
+        if (loggedUser == null) {
+            throw new AuthenticationException("You must login to delete a song.");
+        } else if ( songService.getOwnerForSongId(id).getId() != loggedUser.getId() ) {
+            throw new AuthenticationException("You cannot delete songs uploaded by other users.");
+        } else {
+            songService.deleteSong(id);
+            return new MessageDTO(String.format("You have successfully deleted song id#%s", id));
+        }
     }
 
     @GetMapping("/songs/{id}/info")
     @SneakyThrows
-    public SongUploadResponseDTO getById (@PathVariable int id) {
-        return new SongGetResponseDTO(service.getById(id));
+    public SongGetResponseDTO getById (@PathVariable int id) {
+        return new SongGetResponseDTO(songService.getById(id));
     }
 
 
     @GetMapping(value = "/songs/{id}", produces = "audio/mpeg")
     @SneakyThrows
     public byte[] playSong (@PathVariable int id) {
-        return service.playSong(id);
+        return songService.playSong(id);
     }
 }

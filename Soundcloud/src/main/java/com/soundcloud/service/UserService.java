@@ -4,6 +4,7 @@ import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.User.*;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
@@ -63,7 +64,7 @@ public class UserService {
         }
     }
 
-    public UserMessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
+    public MessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
         if (user == null) {
             throw new NotFoundException("User not found!");
@@ -76,10 +77,10 @@ public class UserService {
         }
         user.getFollowers().add(loggedUser);
         this.userRepository.save(user);
-        return new UserMessageDTO("You successfully followed " + user.getUsername() + "!");
+        return new MessageDTO("You successfully followed " + user.getUsername() + "!");
     }
 
-    public UserMessageDTO unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
+    public MessageDTO unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
         if (user == null) {
             throw new NotFoundException("User not found!");
@@ -92,7 +93,7 @@ public class UserService {
         }
         user.getFollowers().remove(loggedUser);
         this.userRepository.save(user);
-        return new UserMessageDTO("You successfully unfollowed " + user.getUsername() + "!");
+        return new MessageDTO("You successfully unfollowed " + user.getUsername() + "!");
     }
 
     public UserDTO userInformation(String username) {
@@ -103,7 +104,7 @@ public class UserService {
         return new UserDTO(user);
     }
 
-    public UserMessageDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
+    public MessageDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
         if (updateDTO.getAge() > 0) {
             loggedUser.setAge(updateDTO.getAge());
         }
@@ -111,7 +112,7 @@ public class UserService {
         Validator.updatePassword(updateDTO, loggedUser);
         Validator.updateEmail(updateDTO.getEmail(), loggedUser);
         this.userRepository.save(loggedUser);
-        return new UserMessageDTO("You successfully updated your profile!");
+        return new MessageDTO("You successfully updated your profile!");
     }
 
     public MyProfileResponseDTO viewMyProfile(User loggedUser) {
@@ -120,8 +121,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserMessageDTO removeProfile(int userID) {
+    public MessageDTO removeProfile(int userID) {
         this.userRepository.deleteUserById(userID);
-        return new UserMessageDTO("Your profile was removed!");
+        return new MessageDTO("Your profile was removed!");
     }
 }

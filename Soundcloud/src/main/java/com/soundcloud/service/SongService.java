@@ -2,6 +2,7 @@ package com.soundcloud.service;
 
 import com.soundcloud.exceptions.FileWriteException;
 import com.soundcloud.exceptions.NotFoundException;
+import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
@@ -46,7 +47,7 @@ public class SongService {
     public Song getById(int id) {
         Song s = songRepository.getSongById(id);
         if (s == null)  {
-            throw new NotFoundException("User with id " + id + " not found.");
+            throw new NotFoundException("Song with id " + id + " not found.");
         } else {
             return s;
         }
@@ -67,5 +68,15 @@ public class SongService {
             throw new NotFoundException("Error parsing file at " + s.getUrl());
         }
         return array;
+    }
+
+    public User getOwnerForSongId(int songId) {
+        Song song = getById(songId);
+        return song.getOwner();
+    }
+
+    public void deleteSong(int songId) {
+        SongGetResponseDTO dto = new SongGetResponseDTO(getById(songId));
+        songRepository.deleteById(songId);
     }
 }

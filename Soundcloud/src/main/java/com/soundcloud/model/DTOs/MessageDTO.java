@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorDTO {
-    private String errorMessage;
+public class MessageDTO {
+    private String responseMessage;
 }

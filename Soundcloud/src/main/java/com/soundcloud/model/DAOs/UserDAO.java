@@ -1,7 +1,7 @@
 package com.soundcloud.model.DAOs;
 
 import com.soundcloud.model.DTOs.User.FollowRequestUserDTO;
-import com.soundcloud.model.DTOs.User.UserMessageDTO;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class UserDAO {
         this.repository = repository;
     }
 
-    public UserMessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) throws SQLException {
+    public MessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) throws SQLException {
         String followQuery = "INSERT INTO users_follow_users(followed_id, follower_id) " +
                 "VALUES(?,?)";
 
@@ -32,16 +32,16 @@ public class UserDAO {
         pr.executeUpdate();
         pr.close();
 
-        return new UserMessageDTO("You successfully followed " + this.repository.findUserById(followDTO.getUserID()).getUsername());
+        return new MessageDTO("You successfully followed " + this.repository.findUserById(followDTO.getUserID()).getUsername());
     }
 
-    public UserMessageDTO unfollowUser(FollowRequestUserDTO unfollowDTO, User loggedUser) throws SQLException {
+    public MessageDTO unfollowUser(FollowRequestUserDTO unfollowDTO, User loggedUser) throws SQLException {
         String unfollowQuery = "DELETE FROM users_follow_users WHERE followed_id = ? AND follower_id = ?";
         PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(unfollowQuery);
         pr.setInt(1, unfollowDTO.getUserID());
         pr.setInt(2, loggedUser.getId());
         pr.executeUpdate();
         pr.close();
-        return new UserMessageDTO("You successfully unfollowed " + this.repository.findUserById(unfollowDTO.getUserID()).getUsername());
+        return new MessageDTO("You successfully unfollowed " + this.repository.findUserById(unfollowDTO.getUserID()).getUsername());
     }
 }
