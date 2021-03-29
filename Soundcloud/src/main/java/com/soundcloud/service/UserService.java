@@ -1,8 +1,11 @@
 package com.soundcloud.service;
 
+import java.util.*;
+
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
+import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
@@ -24,7 +27,13 @@ public class UserService {
         Validator.userRepository = this.userRepository;
     }
 
-    public UserDTO register(RegisterRequestUserDTO registerDTO) {
+    public void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found!");
+        }
+    }
+
+    public UserProfileResponseDTO register(RegisterRequestUserDTO registerDTO) {
         if (!Validator.validateName(registerDTO.getUsername())) {
             throw new BadRequestException("Username format is not correct!");
         }
@@ -48,27 +57,23 @@ public class UserService {
 
         User user = new User(registerDTO);
         user = this.userRepository.save(user);
-        return new UserDTO(user);
+        return new UserProfileResponseDTO(user);
     }
 
-    public UserDTO login(LoginRequestUserDTO loginDTO) {
+    public UserProfileResponseDTO login(LoginRequestUserDTO loginDTO) {
         User user = this.userRepository.findUserByUsername(loginDTO.getUsername());
-        if (user == null) {
-            throw new AuthenticationException("Wrong credentials!");
+        if (user != null) {
+            PasswordEncoder encoder = new BCryptPasswordEncoder();
+            if (encoder.matches(loginDTO.getPassword(), user.getPassword())) {
+                return new UserProfileResponseDTO(user);
+            }
         }
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (encoder.matches(loginDTO.getPassword(), user.getPassword())) {
-            return new UserDTO(user);
-        } else {
-            throw new AuthenticationException("Wrong credentials!");
-        }
+        throw new AuthenticationException("Wrong credentials!");
     }
 
     public MessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
-        if (user == null) {
-            throw new NotFoundException("User not found!");
-        }
+        validateUser(user);
         if (followDTO.getUserID() == loggedUser.getId()) {
             throw new BadRequestException("You can`t un/follow yourself!");
         }
@@ -82,9 +87,7 @@ public class UserService {
 
     public MessageDTO unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
-        if (user == null) {
-            throw new NotFoundException("User not found!");
-        }
+        validateUser(user);
         if (followDTO.getUserID() == loggedUser.getId()) {
             throw new BadRequestException("You can`t un/follow yourself!");
         }
@@ -96,33 +99,40 @@ public class UserService {
         return new MessageDTO("You successfully unfollowed " + user.getUsername() + "!");
     }
 
-    public UserDTO userInformation(String username) {
+    public UserProfileResponseDTO userInformation(String username) {
         User user = this.userRepository.findUserByUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User with this username not found!");
-        }
-        return new UserDTO(user);
+        validateUser(user);
+        return new UserProfileResponseDTO(user);
     }
 
-    public MessageDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
+    public UserProfileResponseDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
         if (updateDTO.getAge() > 0) {
             loggedUser.setAge(updateDTO.getAge());
         }
         Validator.updateUsername(updateDTO.getUsername(), loggedUser);
         Validator.updatePassword(updateDTO, loggedUser);
         Validator.updateEmail(updateDTO.getEmail(), loggedUser);
-        this.userRepository.save(loggedUser);
-        return new MessageDTO("You successfully updated your profile!");
+        User user = this.userRepository.save(loggedUser);
+        return new UserProfileResponseDTO(user);
     }
 
-    public MyProfileResponseDTO viewMyProfile(User loggedUser) {
+    public UserProfileResponseDTO viewMyProfile(User loggedUser) {
         User user = this.userRepository.findUserByUsername(loggedUser.getUsername());
-        return new MyProfileResponseDTO(user);
+        return new UserProfileResponseDTO(user);
     }
 
     @Transactional
     public MessageDTO removeProfile(int userID) {
         this.userRepository.deleteUserById(userID);
         return new MessageDTO("Your profile was removed!");
+    }
+
+    public List<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
+        List<User> filteredUsers = this.userRepository.findAll();
+        List<FilterResponseUserDTO> responseUserDTO = new ArrayList<>();
+        for (User user1 : filteredUsers){
+            responseUserDTO.add(new FilterResponseUserDTO(user1));
+        }
+        return responseUserDTO;
     }
 }

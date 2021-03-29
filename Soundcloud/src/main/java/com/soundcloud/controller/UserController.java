@@ -1,6 +1,9 @@
 package com.soundcloud.controller;
 
+import java.util.*;
+
 import com.soundcloud.exceptions.BadRequestException;
+import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
@@ -21,65 +24,70 @@ public class UserController extends AbstractController {
         this.sessionManager = sessionManager;
     }
 
-    @PostMapping("/register")
-    public UserDTO register(@RequestBody RegisterRequestUserDTO registerDTO, HttpSession session) {
+    @PostMapping("/users/register")
+    public UserProfileResponseDTO register(@RequestBody RegisterRequestUserDTO registerDTO, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser != null){
+        if (loggedUser != null) {
             throw new BadRequestException("You have to logout and then register again!");
         }
         return this.userService.register(registerDTO);
     }
 
-    @PostMapping("/login")
-    public UserDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
+    @PostMapping("/users/login")
+    public UserProfileResponseDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
-        if(loggedUser != null){
+        if (loggedUser != null) {
             throw new BadRequestException("You already logged in!");
         }
-        UserDTO responseDTO = this.userService.login(loginDTO);
+        UserProfileResponseDTO responseDTO = this.userService.login(loginDTO);
         this.sessionManager.loginUser(session, responseDTO.getId());
         return responseDTO;
     }
 
-    @PostMapping("/logout")
-    public MessageDTO logout(HttpSession session){
+    @PostMapping("/users/logout")
+    public MessageDTO logout(HttpSession session) {
         this.sessionManager.validateUser(session, "You have to login and then logout!");
         this.sessionManager.logoutUser(session);
         return new MessageDTO("You successfully logout!");
     }
 
-    @DeleteMapping("/remove-profile")
-    public MessageDTO removeProfile(HttpSession session){
+    @DeleteMapping("/users/remove-profile")
+    public MessageDTO removeProfile(HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove your profile!");
         return this.userService.removeProfile(loggedUser.getId());
     }
 
-    @PostMapping("/follow-user")
+    @PostMapping("/users/follow-user")
     public MessageDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
         return this.userService.followUser(followDTO, loggedUser);
     }
 
-    @DeleteMapping("/unfollow-user")
+    @DeleteMapping("/users/unfollow-user")
     public MessageDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
         return this.userService.unfollowUser(unfollowDTO, loggedUser);
     }
 
-    @PutMapping("/update-profile")
-    public MessageDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session){
+    @PutMapping("/users/update-profile")
+    public UserProfileResponseDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your profile!");
         return this.userService.updateProfile(updateDTO, loggedUser);
     }
 
-    @GetMapping("/my-profile")
-    public MyProfileResponseDTO viewProfile(HttpSession session){
+    @GetMapping("/users/my-profile")
+    public UserProfileResponseDTO viewProfile(HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then view your profile!");
         return this.userService.viewMyProfile(loggedUser);
     }
 
+    @GetMapping("/users/filter-users")
+    public List<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
+        return this.userService.filterUsers(filterUserDTO);
+    }
+
     @GetMapping("/users/{username}")
-    public UserDTO userInformation(@PathVariable String username){
+    public UserProfileResponseDTO userInformation(@PathVariable String username) {
         return this.userService.userInformation(username);
     }
 }

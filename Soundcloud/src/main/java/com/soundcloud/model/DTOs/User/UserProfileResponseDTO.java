@@ -19,19 +19,23 @@ import java.util.List;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class MyProfileResponseDTO {
+public class UserProfileResponseDTO {
+    private int id;
     private String username;
     private String email;
     private int age;
+    private int followers;
     private LocalDateTime createdAt;
     private List<Comment> comments;
     private List<Playlist> playlists;
     private List<Song> songs;
 
-    public MyProfileResponseDTO(User user) {
+    public UserProfileResponseDTO(User user) {
+        this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.age = user.getAge();
+        this.followers = user.getFollowers().size();
         this.createdAt = user.getCreatedAt();
         this.comments = user.getComments();
         this.playlists = user.getPlaylists();
