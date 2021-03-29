@@ -30,16 +30,16 @@ public class SongController extends AbstractController {
         this.userService = userService;
     }
 
+    // POST //
     @PostMapping("/songs")
-    @SneakyThrows
     public SongUploadResponseDTO upload (@RequestPart MultipartFile file, @RequestPart String name, HttpSession session) {
         User loggedUser = sessionManager.validateUser(session, "You must login to upload a song.");
         Song uploadedSong = songService.uploadSong(name, file, loggedUser);
         return new SongUploadResponseDTO(uploadedSong);
     }
 
+    // DELETE //
     @DeleteMapping("/songs/{id}")
-    @SneakyThrows
     public MessageDTO delete(@PathVariable int id, HttpSession session, HttpServletResponse res) {
         User loggedUser = sessionManager.getLoggedUser(session);
         if (loggedUser == null) {
@@ -52,29 +52,33 @@ public class SongController extends AbstractController {
         }
     }
 
+    // GET //
     @GetMapping("/songs/{id}/info")
-    @SneakyThrows
     public SongGetResponseDTO getById (@PathVariable int id) {
         return new SongGetResponseDTO(songService.getById(id));
     }
 
-
     @GetMapping(value = "/songs/{id}", produces = "audio/mpeg")
-    @SneakyThrows
     public byte[] playSong (@PathVariable int id) {
         return songService.playSong(id);
     }
 
     @GetMapping("songs/{username}")
-    @SneakyThrows
     public List<SongGetResponseDTO> getByUsername(@PathVariable String username) {
         return songService.getByUsername(username);
     }
 
     @GetMapping("songs/liked")
-    @SneakyThrows
     public List<SongGetResponseDTO> getLikedSongs(HttpSession session) {
         User loggedUser = sessionManager.validateUser(session, "You must login to see your liked songs.");
         return songService.getLikedByUser(loggedUser);
     }
+
+    // PUT //
+    @PutMapping("/songs/{id}/set-like-status")
+    public MessageDTO setLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable(name = "id") int songId) {
+        User loggedUser = sessionManager.validateUser(session, "You must login to like/dislike a song.");
+        return songService.setLike(songId, likeValue, loggedUser);
+    }
+
 }

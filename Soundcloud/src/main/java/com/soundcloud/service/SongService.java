@@ -3,6 +3,7 @@ package com.soundcloud.service;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.FileWriteException;
 import com.soundcloud.exceptions.NotFoundException;
+import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,5 +103,54 @@ public class SongService {
     public List<SongGetResponseDTO> getLikedByUser(User likedUser) {
         List<Song> songs = songRepository.getAllByLikersContaining(likedUser);
         return songs.stream().map(SongGetResponseDTO::new).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public MessageDTO setLike(int songId, int likeValue, User loggedUser) {
+        Song targetSong = songRepository.getSongById(songId);
+        String action = new String("");
+
+        if(targetSong == null) {
+            throw new NotFoundException("The song you are trying to like or dislike was not found.");
+        }
+
+        switch (likeValue) {
+            case 1:
+                if (loggedUser.getLikedSongs().contains(targetSong)) return new MessageDTO("Song left liked.");
+                if (loggedUser.getDislikedSongs().contains(targetSong)) setLike(songId, 0, loggedUser);
+                loggedUser.getLikedSongs().add(targetSong);
+                targetSong.getLikers().add(loggedUser);
+                action = "liked";
+                break;
+            case 0:
+                if(loggedUser.getLikedSongs().contains(targetSong)) {
+                    // If song was previously liked
+                    loggedUser.getLikedSongs().remove(targetSong);
+                    targetSong.getLikers().remove(loggedUser);
+                    action = "unliked";
+                } else if (loggedUser.getDislikedSongs().contains(targetSong)) {
+                    // If song was previously disliked
+                    loggedUser.getDislikedSongs().remove(targetSong);
+                    targetSong.getDislikers().remove(loggedUser);
+                    action = "undisliked";
+                } else {
+                    // If song was previously neutral
+                    return new MessageDTO("Song status left at neutral.");
+                }
+                break;
+            case -1:
+                if (loggedUser.getDislikedSongs().contains(targetSong)) return new MessageDTO("Song left disliked.");
+                if (loggedUser.getLikedSongs().contains(targetSong)) setLike(songId, 0, loggedUser);
+                loggedUser.getDislikedSongs().add(targetSong);
+                targetSong.getDislikers().add(loggedUser);
+                action = "disliked";
+                break;
+            default:
+                throw new BadRequestException("Invalid like status passed.");
+        }
+
+        userRepository.save(loggedUser);
+        songRepository.save(targetSong);
+        return new MessageDTO("You successfully " +action+ " song id#" + songId);
     }
 }
