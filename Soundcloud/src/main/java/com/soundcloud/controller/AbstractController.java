@@ -2,14 +2,11 @@ package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
-import com.soundcloud.exceptions.FileWriteException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.ErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.sql.SQLException;
 
 public abstract class AbstractController {
 
@@ -30,11 +27,4 @@ public abstract class AbstractController {
     public ErrorDTO handleNotFoundResource(NotFoundException e){
         return new ErrorDTO(e.getMessage());
     }
-
-//    @ExceptionHandler(Exception.class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public ErrorDTO handleNotFoundResource(Exception e){
-//        return new ErrorDTO("An exception has occurred in the server. Details: " + e.getMessage());
-//    }
-
 }

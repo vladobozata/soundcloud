@@ -68,13 +68,11 @@ public class UserService {
         if (user == null) {
             throw new NotFoundException("User not found!");
         }
-        if(followDTO.getUserID() == loggedUser.getId()){
+        if (followDTO.getUserID() == loggedUser.getId()) {
             throw new BadRequestException("You can`t un/follow yourself!");
         }
-        for (User follower : user.getFollowers()) {
-            if (follower.getId() == loggedUser.getId()) {
-                throw new BadRequestException("You already follow " + user.getUsername() + "!");
-            }
+        if (user.getFollowers().contains(loggedUser)) {
+            throw new BadRequestException("You already follow " + user.getUsername() + "!");
         }
         user.getFollowers().add(loggedUser);
         this.userRepository.save(user);
@@ -86,17 +84,15 @@ public class UserService {
         if (user == null) {
             throw new NotFoundException("User not found!");
         }
-        if(followDTO.getUserID() == loggedUser.getId()){
+        if (followDTO.getUserID() == loggedUser.getId()) {
             throw new BadRequestException("You can`t un/follow yourself!");
         }
-        for(User follower : user.getFollowers()){
-            if(follower.getId() == loggedUser.getId()){
-                user.getFollowers().remove(loggedUser);
-                this.userRepository.save(user);
-                return new UserMessageDTO("You successfully unfollowed " + user.getUsername() + "!");
-            }
+        if (!user.getFollowers().contains(loggedUser)) {
+            throw new BadRequestException("You do not follow " + user.getUsername() + "!");
         }
-        throw new BadRequestException("You do not follow " + user.getUsername() + "!");
+        user.getFollowers().remove(loggedUser);
+        this.userRepository.save(user);
+        return new UserMessageDTO("You successfully unfollowed " + user.getUsername() + "!");
     }
 
     public UserDTO userInformation(String username) {

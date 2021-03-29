@@ -30,6 +30,12 @@ public class PlaylistService {
         this.songRepository = songRepository;
     }
 
+    public void validatePlaylist(Playlist playlist){
+        if (playlist == null) {
+            throw new NotFoundException("Playlist not found!");
+        }
+    }
+
     public PlaylistResponseDTO addPlaylist(String name, User user) {
         if (!Validator.validateName(name)) {
             throw new BadRequestException("Playlist name format is not correct!");
@@ -44,9 +50,7 @@ public class PlaylistService {
     @Transactional
     public UserMessageDTO removePlaylist(int playlistID, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(playlistID);
-        if (playlist == null) {
-            throw new NotFoundException("Playlist not found!");
-        }
+        validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
             throw new AuthenticationException("You can`t remove foreign playlist!");
         }
@@ -56,52 +60,40 @@ public class PlaylistService {
 
     public UserMessageDTO removeSongFromPlaylist(SongToPlaylistDTO removeSongDTO, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(removeSongDTO.getPlaylistID());
-        if (playlist == null) {
-            throw new NotFoundException("Playlist not found!");
-        }
+        validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
             throw new AuthenticationException("You can`t remove a song from foreign playlist!");
         }
         Song song = this.songRepository.getSongById(removeSongDTO.getSongID());
-        if (song.getId() == removeSongDTO.getSongID()) {
-            for (int i = 0; i < playlist.getSongs().size(); i++) {
-                if (playlist.getSongs().get(i).getId() == removeSongDTO.getSongID()) {
-                    playlist.getSongs().remove(song);
-                    this.playlistRepository.save(playlist);
-                    return new UserMessageDTO("The song was successfully removed from your playlist!");
-                }
-            }
+        if (!playlist.getSongs().contains(song)) {
+            throw new NotFoundException("The song you are trying to remove not found!");
         }
-        throw new NotFoundException("The song you are trying to remove not found!");
+        playlist.getSongs().remove(song);
+        this.playlistRepository.save(playlist);
+        return new UserMessageDTO("The song was successfully removed from your playlist!");
     }
 
     public UserMessageDTO addSongToPlaylist(SongToPlaylistDTO addSongDTO, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(addSongDTO.getPlaylistID());
-        if (playlist == null) {
-            throw new NotFoundException("Playlist not found!");
-        }
+        validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
             throw new AuthenticationException("You can`t add a song to foreign playlist!");
         }
         Song song = this.songRepository.getSongById(addSongDTO.getSongID());
-        if (song.getId() == addSongDTO.getSongID()) {
-            for (int i = 0; i < playlist.getSongs().size(); i++) {
-                if (playlist.getSongs().get(i).getId() == addSongDTO.getSongID()) {
-                    throw new BadRequestException("The song is already added to this playlist!");
-                }
-            }
-            playlist.getSongs().add(song);
-            this.playlistRepository.save(playlist);
-            return new UserMessageDTO("The song was successfully added to your playlist!");
+        if (song == null) {
+            throw new NotFoundException("The song you are trying to add not found!");
         }
-        throw new NotFoundException("The song you are trying to add not found!");
+        if (playlist.getSongs().contains(song)) {
+            throw new BadRequestException("The song is already added to this playlist!");
+        }
+        playlist.getSongs().add(song);
+        this.playlistRepository.save(playlist);
+        return new UserMessageDTO("The song was successfully added to your playlist!");
     }
 
     public PlaylistResponseDTO getPlaylistSongs(int playlistID) {
         Playlist playlist = this.playlistRepository.getPlaylistById(playlistID);
-        if (playlist == null) {
-            throw new NotFoundException("Playlist not found!");
-        }
+        validatePlaylist(playlist);
         return new PlaylistResponseDTO(playlist);
     }
 
@@ -119,9 +111,7 @@ public class PlaylistService {
 
     public UserMessageDTO updatePlaylistName(UpdatePlaylistNameDTO updateNameDTO, User loggedUser) {
         Playlist playlist = this.playlistRepository.getPlaylistById(updateNameDTO.getPlaylistID());
-        if (playlist == null) {
-            throw new NotFoundException("Playlist not found!");
-        }
+        validatePlaylist(playlist);
         if (playlist.getOwner().getId() != loggedUser.getId()) {
             throw new AuthenticationException("You can`t update foreign playlist!");
         }
