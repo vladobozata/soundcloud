@@ -1,7 +1,5 @@
 package com.soundcloud.model.repositories;
 
-import java.util.*;
-
 import com.soundcloud.model.POJOs.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

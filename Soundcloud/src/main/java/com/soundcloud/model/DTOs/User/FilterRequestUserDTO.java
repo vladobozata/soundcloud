@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FilterRequestUserDTO {
-    private String query;
-    private String sort;
-    private String direction;
+    private String sortBy;
+    private String orderBy;
 }

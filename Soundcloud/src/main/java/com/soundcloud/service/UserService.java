@@ -5,12 +5,14 @@ import java.util.*;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
+import com.soundcloud.model.DAOs.UserDAO;
 import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,10 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final UserDAO userDAO;
+    private final static String FILTER_BY_SONGS = "songs";
+    private final static String FILTER_BY_COMMENTS = "comments";
+    private final static String FILTER_BY_PLAYLISTS = "playlists";
+    private final static String FILTER_BY_FOLLOWERS = "followers";
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserDAO userDAO) {
         this.userRepository = userRepository;
+        this.userDAO = userDAO;
         Validator.userRepository = this.userRepository;
     }
 
@@ -127,12 +135,21 @@ public class UserService {
         return new MessageDTO("Your profile was removed!");
     }
 
+    @SneakyThrows
     public List<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
-        List<User> filteredUsers = this.userRepository.findAll();
-        List<FilterResponseUserDTO> responseUserDTO = new ArrayList<>();
-        for (User user1 : filteredUsers){
-            responseUserDTO.add(new FilterResponseUserDTO(user1));
+        if (!filterUserDTO.getOrderBy().equalsIgnoreCase("ASC")) {
+            if (!filterUserDTO.getOrderBy().equalsIgnoreCase("DESC")) {
+                throw new BadRequestException("Invalid order type!");
+            }
         }
-        return responseUserDTO;
+        switch (filterUserDTO.getSortBy()) {
+            case FILTER_BY_COMMENTS:
+            case FILTER_BY_FOLLOWERS:
+            case FILTER_BY_PLAYLISTS:
+            case FILTER_BY_SONGS:
+                return this.userDAO.getFilteredUsers(filterUserDTO);
+            default:
+                throw new NotFoundException("Sort type not found!");
+        }
     }
 }

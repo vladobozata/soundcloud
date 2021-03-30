@@ -81,7 +81,7 @@ public class UserController extends AbstractController {
         return this.userService.viewMyProfile(loggedUser);
     }
 
-    @GetMapping("/users/filter-users")
+    @PostMapping("/users/filter-users")
     public List<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
         return this.userService.filterUsers(filterUserDTO);
     }
