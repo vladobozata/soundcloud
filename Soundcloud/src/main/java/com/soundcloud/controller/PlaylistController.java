@@ -1,8 +1,8 @@
 package com.soundcloud.controller;
 
-import com.soundcloud.model.DTOs.Playlist.AddPlaylistDTO;
+import com.soundcloud.model.DTOs.Playlist.AddPlaylistRequestDTO;
 import com.soundcloud.model.DTOs.Playlist.PlaylistResponseDTO;
-import com.soundcloud.model.DTOs.Playlist.SongToPlaylistDTO;
+import com.soundcloud.model.DTOs.Playlist.SongToPlaylistRequestDTO;
 import com.soundcloud.model.DTOs.Playlist.UpdatePlaylistNameDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
@@ -25,7 +25,7 @@ public class PlaylistController extends AbstractController{
     }
 
     @PostMapping("/playlists")
-    public PlaylistResponseDTO addPlaylist(@RequestBody AddPlaylistDTO playlistDTO, HttpSession session){
+    public PlaylistResponseDTO addPlaylist(@RequestBody AddPlaylistRequestDTO playlistDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then add a playlist!");
         return this.playlistService.addPlaylist(playlistDTO.getName(), loggedUser);
     }
@@ -37,13 +37,13 @@ public class PlaylistController extends AbstractController{
     }
 
     @DeleteMapping("/playlists/songs")
-    public MessageDTO removeSongFromPlaylist(@RequestBody SongToPlaylistDTO removeSongDTO, HttpSession session){
+    public MessageDTO removeSongFromPlaylist(@RequestBody SongToPlaylistRequestDTO removeSongDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove a song from playlist!");
         return this.playlistService.removeSongFromPlaylist(removeSongDTO, loggedUser);
     }
 
     @PutMapping("/playlists/songs")
-    public MessageDTO addSongToPlaylist(@RequestBody SongToPlaylistDTO addSongDTO, HttpSession session){
+    public MessageDTO addSongToPlaylist(@RequestBody SongToPlaylistRequestDTO addSongDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then add a song to playlist!");
         return this.playlistService.addSongToPlaylist(addSongDTO, loggedUser);
     }

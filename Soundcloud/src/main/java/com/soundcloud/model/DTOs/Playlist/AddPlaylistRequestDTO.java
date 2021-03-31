@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddPlaylistDTO {
+public class AddPlaylistRequestDTO {
     private String name;
 }

@@ -1,5 +1,8 @@
 package com.soundcloud.model.DTOs.User;
 
+import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
+import com.soundcloud.model.DTOs.Playlist.PlaylistResponseDTO;
+import com.soundcloud.model.DTOs.Song.SongFilterResponseDTO;
 import com.soundcloud.model.POJOs.Comment;
 import com.soundcloud.model.POJOs.Playlist;
 import com.soundcloud.model.POJOs.Song;
@@ -10,8 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -26,19 +29,28 @@ public class UserProfileResponseDTO {
     private int age;
     private int followers;
     private LocalDateTime createdAt;
-    private List<Comment> comments;
-    private List<Playlist> playlists;
-    private List<Song> songs;
+    private List<CommentResponseDTO> comments;
+    private List<PlaylistResponseDTO> playlists;
+    private List<SongFilterResponseDTO> songs;
 
     public UserProfileResponseDTO(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.age = user.getAge();
-        this.followers = user.getFollowers().size();
         this.createdAt = user.getCreatedAt();
-        this.comments = user.getComments();
-        this.playlists = user.getPlaylists();
-        this.songs = user.getSongs();
+        this.playlists = new ArrayList<>();
+        this.followers = user.getFollowers().size();
+        this.songs = new ArrayList<>();
+        this.comments = new ArrayList<>();
+        for(Comment comment : user.getComments()){
+            this.comments.add(new CommentResponseDTO(comment));
+        }
+        for(Playlist playlist : user.getPlaylists()){
+            this.playlists.add(new PlaylistResponseDTO(playlist));
+        }
+        for(Song song : user.getSongs()){
+            this.songs.add(new SongFilterResponseDTO(song));
+        }
     }
 }

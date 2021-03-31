@@ -6,7 +6,7 @@ import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.Playlist.PlaylistResponseDTO;
-import com.soundcloud.model.DTOs.Playlist.SongToPlaylistDTO;
+import com.soundcloud.model.DTOs.Playlist.SongToPlaylistRequestDTO;
 import com.soundcloud.model.DTOs.Playlist.UpdatePlaylistNameDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.Playlist;
@@ -58,7 +58,7 @@ public class PlaylistService {
         return new MessageDTO("The playlist was successfully removed!");
     }
 
-    public MessageDTO removeSongFromPlaylist(SongToPlaylistDTO removeSongDTO, User user) {
+    public MessageDTO removeSongFromPlaylist(SongToPlaylistRequestDTO removeSongDTO, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(removeSongDTO.getPlaylistID());
         validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
@@ -73,7 +73,7 @@ public class PlaylistService {
         return new MessageDTO("The song was successfully removed from your playlist!");
     }
 
-    public MessageDTO addSongToPlaylist(SongToPlaylistDTO addSongDTO, User user) {
+    public MessageDTO addSongToPlaylist(SongToPlaylistRequestDTO addSongDTO, User user) {
         Playlist playlist = this.playlistRepository.getPlaylistById(addSongDTO.getPlaylistID());
         validatePlaylist(playlist);
         if (playlist.getOwner().getId() != user.getId()) {
