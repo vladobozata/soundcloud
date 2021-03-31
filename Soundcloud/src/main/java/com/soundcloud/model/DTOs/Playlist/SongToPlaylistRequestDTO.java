@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class SongToPlaylistDTO {
+public class SongToPlaylistRequestDTO {
     private int playlistID;
     private int songID;
 }

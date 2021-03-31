@@ -29,10 +29,10 @@ public class User {
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
-    private List<Comment> comments = new ArrayList<>();;
+    private List<Comment> comments = new ArrayList<>();
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
-    private List<Song> songs = new ArrayList<>();;
+    private List<Song> songs = new ArrayList<>();
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
     private List<Playlist> playlists = new ArrayList<>();
