@@ -10,5 +10,5 @@ import java.util.ArrayList;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-
+    Comment findCommentById(int id);
 }

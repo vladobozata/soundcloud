@@ -1,8 +1,11 @@
 package com.soundcloud.service;
 
+import com.soundcloud.exceptions.AuthenticationException;
+import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
+import com.soundcloud.model.DTOs.ResourceRequestDTO;
 import com.soundcloud.model.POJOs.Comment;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
@@ -46,5 +49,16 @@ public class CommentService {
         songRepository.save(songCommented);
         commentRepository.save(comment);
         return new MessageDTO("Comment posted. Comment id: #" + comment.getId());
+    }
+
+    public MessageDTO deleteComment(ResourceRequestDTO requestDTO, User loggedUser) {
+        Integer id = requestDTO.getResourceId();
+        if (id == null) throw new BadRequestException("Must select comment to delete by id.");
+        Comment comment = commentRepository.findCommentById(id);
+        if (comment == null) throw new NotFoundException("Comment id#" +id+ " was not found.");
+        if (comment.getOwner().getId() != loggedUser.getId()) throw new AuthenticationException("Cannot delete comments from other users.");
+
+        commentRepository.delete(comment);
+        return new MessageDTO("Comment id#" +id+ " successfully deleted.");
     }
 }
