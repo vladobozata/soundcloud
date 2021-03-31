@@ -82,8 +82,8 @@ public class SongController extends AbstractController {
     }
 
     // PUT //
-    @PutMapping("/songs/{id}/set-like-status")
-    public MessageDTO setLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable(name = "id") int songId) {
+    @PutMapping("/songs/{songId}/set-like-status")
+    public MessageDTO setSongLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int songId) {
         User loggedUser = sessionManager.validateUser(session, "You must login to like/dislike a song.");
         return songService.setLike(songId, likeValue, loggedUser);
     }

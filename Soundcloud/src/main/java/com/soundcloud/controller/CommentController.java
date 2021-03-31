@@ -48,4 +48,11 @@ public class CommentController extends AbstractController {
     public CommentResponseDTO getCommentById(@PathVariable int commentId) {
         return commentService.getCommentById(commentId);
     }
+
+    // PUT
+    @PutMapping("comments/{commentId}/set-like-status")
+    public MessageDTO setCommentLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int commentId) {
+        User loggedUser = sessionManager.validateUser(session, "You must login to like/dislike a comment.");
+        return commentService.setLike(commentId, likeValue, loggedUser);
+    }
 }

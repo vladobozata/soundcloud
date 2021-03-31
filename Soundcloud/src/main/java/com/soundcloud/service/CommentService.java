@@ -78,4 +78,53 @@ public class CommentService {
         if (comment == null) throw new NotFoundException("Comment id#" +commentId+ " was not found.");
         return new CommentResponseDTO(comment);
     }
+
+    public MessageDTO setLike(int commentId, int likeValue, User loggedUser) {
+        Comment targetComment = commentRepository.findCommentById(commentId);
+        String action = new String("");
+
+        if (targetComment == null) {
+            throw new NotFoundException("The comment you are trying to like or dislike was not found.");
+        }
+
+        switch (likeValue) {
+            case 1:
+                if (loggedUser.getLikedComments().contains(targetComment)) return new MessageDTO("Comment left liked.");
+                if (loggedUser.getDislikedComments().contains(targetComment)) setLike(commentId, 0, loggedUser);
+                loggedUser.getLikedComments().add(targetComment);
+                targetComment.getLikers().add(loggedUser);
+                action = "liked";
+                break;
+            case 0:
+                if (loggedUser.getLikedComments().contains(targetComment)) {
+                    // If comment was previously liked
+                    loggedUser.getLikedComments().remove(targetComment);
+                    targetComment.getLikers().remove(loggedUser);
+                    action = "unliked";
+                } else if (loggedUser.getDislikedComments().contains(targetComment)) {
+                    // If comment was previously disliked
+                    loggedUser.getDislikedComments().remove(targetComment);
+                    targetComment.getDislikers().remove(loggedUser);
+                    action = "undisliked";
+                } else {
+                    // If comment was previously neutral
+                    return new MessageDTO("Comment status left at neutral.");
+                }
+                break;
+            case -1:
+                if (loggedUser.getDislikedComments().contains(targetComment))
+                    return new MessageDTO("Comment left disliked.");
+                if (loggedUser.getLikedComments().contains(targetComment)) setLike(commentId, 0, loggedUser);
+                loggedUser.getDislikedComments().add(targetComment);
+                targetComment.getDislikers().add(loggedUser);
+                action = "disliked";
+                break;
+            default:
+                throw new BadRequestException("Invalid like status passed.");
+        }
+
+        userRepository.save(loggedUser);
+        commentRepository.save(targetComment);
+        return new MessageDTO("You successfully " +action+ " comment id#" + commentId);
+    }
 }
