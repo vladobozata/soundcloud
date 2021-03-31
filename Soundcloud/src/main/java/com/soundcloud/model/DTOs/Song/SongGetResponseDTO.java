@@ -1,6 +1,6 @@
 package com.soundcloud.model.DTOs.Song;
 
-import com.soundcloud.model.DTOs.Comment.CommentDTO;
+import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
 import com.soundcloud.model.DTOs.User.UserDTO;
 import com.soundcloud.model.POJOs.Comment;
 import com.soundcloud.model.POJOs.Song;
@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 public class SongGetResponseDTO extends SongUploadResponseDTO {
     private int views;
-    private List<CommentDTO> comments;
+    private List<CommentResponseDTO> comments;
     private List<UserDTO> likers;
     private List<UserDTO> dislikers;
 
@@ -29,7 +29,7 @@ public class SongGetResponseDTO extends SongUploadResponseDTO {
         dislikers = new ArrayList<>();
 
         for (Comment comment : song.getComments()) {
-            comments.add(new CommentDTO(comment));
+            comments.add(new CommentResponseDTO(comment));
         }
 
         for (User liker : song.getLikers()) {
