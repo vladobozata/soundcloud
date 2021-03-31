@@ -9,9 +9,13 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CommentDTO {
+    private int id;
+    private String owner;
     private String text;
 
     public CommentDTO(Comment comment) {
+        this.id = comment.getId();
+        this.owner = comment.getOwner().getUsername();
         this.text = comment.getText();
     }
 }

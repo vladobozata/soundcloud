@@ -2,6 +2,7 @@ package com.soundcloud.model.POJOs;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,4 +48,9 @@ public class Comment {
     )
     @JsonManagedReference
     private List<User> dislikers;
+
+    public Comment(String text) {
+        this.text = text;
+        this.createdAt = LocalDateTime.now();
+    }
 }
