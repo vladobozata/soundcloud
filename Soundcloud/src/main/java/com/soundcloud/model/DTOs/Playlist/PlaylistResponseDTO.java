@@ -18,12 +18,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlaylistResponseDTO {
+    private int id;
     private String name;
     private String ownerName;
     private LocalDateTime createdAt;
     private List<Song> songs;
 
     public PlaylistResponseDTO(Playlist playlist){
+        this.id = playlist.getId();
         this.name = playlist.getName();
         this.ownerName = playlist.getOwner().getUsername();
         this.createdAt = playlist.getCreatedAt();

@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -24,16 +25,17 @@ public class User {
     private String password;
     private String email;
     private int age;
+    private String verification;
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();;
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
-    private List<Song> songs;
+    private List<Song> songs = new ArrayList<>();;
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
-    private List<Playlist> playlists;
+    private List<Playlist> playlists = new ArrayList<>();
 
     @ManyToMany(mappedBy = "likers")
     @JsonBackReference
@@ -56,7 +58,7 @@ public class User {
             joinColumns={@JoinColumn(name="followed_id")},
             inverseJoinColumns={@JoinColumn(name="follower_id")})
     @JsonManagedReference
-    private List<User> followers;
+    private List<User> followers = new ArrayList<>();
 
     @ManyToMany(mappedBy = "followers")
     @JsonBackReference
