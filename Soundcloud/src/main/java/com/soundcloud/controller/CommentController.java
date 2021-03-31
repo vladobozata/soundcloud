@@ -1,17 +1,16 @@
 package com.soundcloud.controller;
 
+import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @RestController
 public class CommentController extends AbstractController {
@@ -37,5 +36,11 @@ public class CommentController extends AbstractController {
     public MessageDTO deleteComment(@RequestBody ResourceRequestDTO requestDTO, HttpSession session) {
         User loggedUser = sessionManager.validateUser(session, "You must login in order to delete a comment.");
         return commentService.deleteComment(requestDTO, loggedUser);
+    }
+
+    // GET
+    @GetMapping("/comments/by-song/{songId}")
+    public List<CommentResponseDTO> getCommentBySong(@PathVariable int songId) {
+        return commentService.getCommentBySong(songId);
     }
 }

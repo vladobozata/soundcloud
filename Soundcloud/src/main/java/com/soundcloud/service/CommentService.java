@@ -3,6 +3,7 @@ package com.soundcloud.service;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
+import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -60,5 +63,13 @@ public class CommentService {
 
         commentRepository.delete(comment);
         return new MessageDTO("Comment id#" +id+ " successfully deleted.");
+    }
+
+    public List<CommentResponseDTO> getCommentBySong(int songId) {
+        Song song = songRepository.getSongById(songId);
+        if(song == null) throw new NotFoundException("Song id#" +songId+ " was not found.");
+        List<Comment> songComments = commentRepository.findCommentsBySong(song);
+
+        return songComments.stream().map(CommentResponseDTO::new).collect(Collectors.toList());
     }
 }
