@@ -2,7 +2,6 @@ package com.soundcloud.model.DTOs.Playlist;
 
 import com.soundcloud.model.POJOs.Playlist;
 import com.soundcloud.model.POJOs.Song;
-import com.soundcloud.model.POJOs.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

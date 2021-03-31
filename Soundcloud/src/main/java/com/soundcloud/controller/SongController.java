@@ -2,13 +2,13 @@ package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.model.DTOs.MessageDTO;
+import com.soundcloud.model.DTOs.Song.SongFilterRequestDTO;
+import com.soundcloud.model.DTOs.Song.SongFilterResponseDTO;
 import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
 import com.soundcloud.model.DTOs.Song.SongUploadResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.SongService;
-import com.soundcloud.service.UserService;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +21,11 @@ import java.util.List;
 public class SongController extends AbstractController {
     private final SessionManager sessionManager;
     private final SongService songService;
-    private final UserService userService;
 
     @Autowired
-    public SongController(SongService songService, UserService userService, SessionManager sessionManager) {
+    public SongController(SongService songService, SessionManager sessionManager) {
         this.sessionManager = sessionManager;
         this.songService = songService;
-        this.userService = userService;
     }
 
     // POST //
@@ -36,6 +34,11 @@ public class SongController extends AbstractController {
         User loggedUser = sessionManager.validateUser(session, "You must login to upload a song.");
         Song uploadedSong = songService.uploadSong(name, file, loggedUser);
         return new SongUploadResponseDTO(uploadedSong);
+    }
+
+    @PostMapping("songs/filter")
+    public List<SongFilterResponseDTO> filterSongs(@RequestBody SongFilterRequestDTO request) {
+        return songService.filterSongs(request);
     }
 
     // DELETE //
@@ -63,13 +66,13 @@ public class SongController extends AbstractController {
         return songService.playSong(id);
     }
 
-    @GetMapping("songs/{username}")
-    public List<SongGetResponseDTO> getByUsername(@PathVariable String username) {
+    @GetMapping("/users/{username}/songs/")
+    public List<SongFilterResponseDTO> getByUsername(@PathVariable String username) {
         return songService.getByUsername(username);
     }
 
     @GetMapping("songs/liked")
-    public List<SongGetResponseDTO> getLikedSongs(HttpSession session) {
+    public List<SongFilterResponseDTO> getLikedSongs(HttpSession session) {
         User loggedUser = sessionManager.validateUser(session, "You must login to see your liked songs.");
         return songService.getLikedByUser(loggedUser);
     }

@@ -4,17 +4,23 @@ import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.FileWriteException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.MessageDTO;
+import com.soundcloud.model.DTOs.Song.SongFilterRequestDTO;
+import com.soundcloud.model.DTOs.Song.SongFilterResponseDTO;
 import com.soundcloud.model.DTOs.Song.SongGetResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
 import com.soundcloud.model.repositories.UserRepository;
+import com.soundcloud.util.comparator.Order;
+import com.soundcloud.util.comparator.song.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.*;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,7 +94,7 @@ public class SongService {
         songRepository.deleteById(songId);
     }
 
-    public List<SongGetResponseDTO> getByUsername(String username) {
+    public List<SongFilterResponseDTO> getByUsername(String username) {
         User owner = userRepository.findUserByUsername(username);
         if(owner == null) throw new NotFoundException("Could not find user " + username);
 
@@ -96,13 +102,13 @@ public class SongService {
 
         if(songs == null || songs.isEmpty()) throw new BadRequestException("This user doesn't have any songs.");
 
-        List<SongGetResponseDTO> response = songs.stream().map(SongGetResponseDTO::new).collect(Collectors.toList());
+        List<SongFilterResponseDTO> response = songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
         return response;
     }
 
-    public List<SongGetResponseDTO> getLikedByUser(User likedUser) {
+    public List<SongFilterResponseDTO> getLikedByUser(User likedUser) {
         List<Song> songs = songRepository.getAllByLikersContaining(likedUser);
-        return songs.stream().map(SongGetResponseDTO::new).collect(Collectors.toList());
+        return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 
     @Transactional
@@ -152,5 +158,46 @@ public class SongService {
         userRepository.save(loggedUser);
         songRepository.save(targetSong);
         return new MessageDTO("You successfully " +action+ " song id#" + songId);
+    }
+
+    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO request) {
+        if (request.getQuery() == null) throw new BadRequestException("Trying to query with null parameter.");
+        List<Song> filteredSongs = songRepository.findAllByTitleIgnoreCaseContaining(request.getQuery());
+
+        if (request.getSort() != null) {
+            if (request.getOrder() == null) throw new BadRequestException("Trying to sort without order parameter.");
+            Order order = null;
+
+            try {
+                order = Order.valueOf(request.getOrder().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Search order can be ASC or DESC");
+            }
+
+            Comparator<Song> comparator;
+
+            switch (request.getSort().toLowerCase()) {
+                case "views":
+                    comparator = new ViewsComparator(order);
+                    break;
+                case "comments":
+                    comparator = new CommentsComparator(order);
+                    break;
+                case "likes":
+                    comparator = new LikesComparator(order);
+                    break;
+                case "dislikes":
+                    comparator = new DislikesComparator(order);
+                    break;
+                case "date":
+                    comparator = new DateComparator(order);
+                    break;
+                default:
+                    throw new BadRequestException("Search method not supported.");
+            }
+
+            filteredSongs.sort(comparator);
+        }
+        return filteredSongs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 }
