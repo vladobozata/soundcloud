@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.*;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -160,37 +159,44 @@ public class SongService {
         return new MessageDTO("You successfully " +action+ " song id#" + songId);
     }
 
-    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO request) {
-        if (request.getQuery() == null) throw new BadRequestException("Trying to query with null parameter.");
-        List<Song> filteredSongs = songRepository.findAllByTitleIgnoreCaseContaining(request.getQuery());
+    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) {
+        if (searchRequest.getTitle() == null) throw new BadRequestException("Trying to search without title.");
 
-        if (request.getSort() != null) {
-            if (request.getOrder() == null) throw new BadRequestException("Trying to sort without order parameter.");
+        // Get list of songs from repo, filtered by given title
+        List<Song> filteredSongs = songRepository.findAllByTitleIgnoreCaseContaining(searchRequest.getTitle());
+
+        // If sort parameter is included, sort before returning filtered songs
+        if (searchRequest.getSort() != null) {
+            if (searchRequest.getOrder() == null) throw new BadRequestException("Trying to sort without order parameter.");
             Order order = null;
 
             try {
-                order = Order.valueOf(request.getOrder().toUpperCase());
+                // Initialize order enum using order value from request
+                order = Order.valueOf(searchRequest.getOrder().toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Search order can be ASC or DESC");
             }
 
             Comparator<Song> comparator;
 
-            switch (request.getSort().toLowerCase()) {
+            // Initialize comparator using sort value from request
+            // Compare by view count, comments count, likes count, dislikes count, date uploaded
+            // based on input
+            switch (searchRequest.getSort().toLowerCase()) {
                 case "views":
-                    comparator = new ViewsComparator(order);
+                    comparator = new CompareSongsByViews(order);
                     break;
                 case "comments":
-                    comparator = new CommentsComparator(order);
+                    comparator = new CompareSongsByComments(order);
                     break;
                 case "likes":
-                    comparator = new LikesComparator(order);
+                    comparator = new CompareSongsByLikes(order);
                     break;
                 case "dislikes":
-                    comparator = new DislikesComparator(order);
+                    comparator = new CompareSongsByDislikes(order);
                     break;
                 case "date":
-                    comparator = new DateComparator(order);
+                    comparator = new CompareSongsByDate(order);
                     break;
                 default:
                     throw new BadRequestException("Search method not supported.");

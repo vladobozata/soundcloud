@@ -37,8 +37,8 @@ public class SongController extends AbstractController {
     }
 
     @PostMapping("songs/filter")
-    public List<SongFilterResponseDTO> filterSongs(@RequestBody SongFilterRequestDTO request) {
-        return songService.filterSongs(request);
+    public List<SongFilterResponseDTO> filterSongs(@RequestBody SongFilterRequestDTO searchRequest) {
+        return songService.filterSongs(searchRequest);
     }
 
     // DELETE //

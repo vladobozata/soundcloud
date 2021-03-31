@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SongFilterRequestDTO {
-    private String query;
+    private String title;
     private String sort;
     private String order;
 }

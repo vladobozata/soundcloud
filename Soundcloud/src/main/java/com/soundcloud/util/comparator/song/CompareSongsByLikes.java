@@ -4,17 +4,17 @@ import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.util.comparator.AbstractComparator;
 import com.soundcloud.util.comparator.Order;
 
-public class CommentsComparator extends AbstractComparator {
-    public CommentsComparator(Order order) {
+public class CompareSongsByLikes extends AbstractComparator {
+    public CompareSongsByLikes(Order order) {
         super(order);
     }
 
     @Override
     public int compare(Song o1, Song o2) {
         if (this.order == Order.ASC) {
-            return o1.getComments().size() - o2.getComments().size();
+            return o1.getLikers().size() - o2.getLikers().size();
         } else {
-            return o2.getComments().size() - o1.getComments().size();
+            return o2.getLikers().size() - o1.getLikers().size();
         }
     }
 }
