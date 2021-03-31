@@ -72,4 +72,10 @@ public class CommentService {
 
         return songComments.stream().map(CommentResponseDTO::new).collect(Collectors.toList());
     }
+
+    public CommentResponseDTO getCommentById(int commentId) {
+        Comment comment = commentRepository.findCommentById(commentId);
+        if (comment == null) throw new NotFoundException("Comment id#" +commentId+ " was not found.");
+        return new CommentResponseDTO(comment);
+    }
 }

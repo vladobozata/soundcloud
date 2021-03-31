@@ -43,4 +43,9 @@ public class CommentController extends AbstractController {
     public List<CommentResponseDTO> getCommentBySong(@PathVariable int songId) {
         return commentService.getCommentBySong(songId);
     }
+
+    @GetMapping("/comments/{commentId}")
+    public CommentResponseDTO getCommentById(@PathVariable int commentId) {
+        return commentService.getCommentById(commentId);
+    }
 }
