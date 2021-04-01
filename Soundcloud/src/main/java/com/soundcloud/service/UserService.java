@@ -14,6 +14,7 @@ import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -136,20 +137,26 @@ public class UserService {
     }
 
     @SneakyThrows
-    public List<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
-        if (!filterUserDTO.getOrderBy().equalsIgnoreCase("ASC")) {
-            if (!filterUserDTO.getOrderBy().equalsIgnoreCase("DESC")) {
-                throw new BadRequestException("Invalid order type!");
-            }
-        }
+    public Page<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
+        Pageable pageable = PageRequest.of(filterUserDTO.getPage(), 4);
+
         switch (filterUserDTO.getSortBy()) {
             case FILTER_BY_COMMENTS:
             case FILTER_BY_FOLLOWERS:
             case FILTER_BY_PLAYLISTS:
             case FILTER_BY_SONGS:
-                return this.userDAO.getFilteredUsers(filterUserDTO);
+                break;
             default:
                 throw new NotFoundException("Sort type not found!");
         }
+        //Page<User> entities = userRepository.getDistinctByOrderByCommentsAsc(pageable);
+        Page<User> entities = userRepository.getDistinctByOrderByPlaylistsAsc(pageable);
+        //Page<User> entities = userRepository.getDistinctByOrderByFollowersAsc(pageable);
+        //Page<User> entities = userRepository.getDistinctBy(pageable);
+        List<FilterResponseUserDTO> filteredUsers = new ArrayList<>();
+        for (User user : entities) {
+            filteredUsers.add(new FilterResponseUserDTO(user));
+        }
+        return new PageImpl<>(filteredUsers);
     }
 }

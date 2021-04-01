@@ -27,29 +27,6 @@ public class UserDAO {
         this.repository = repository;
     }
 
-    public MessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) throws SQLException {
-        String followQuery = "INSERT INTO users_follow_users(followed_id, follower_id) " +
-                "VALUES(?,?)";
-
-        PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(followQuery);
-        pr.setInt(1, followDTO.getUserID());
-        pr.setInt(2, loggedUser.getId());
-        pr.executeUpdate();
-        pr.close();
-
-        return new MessageDTO("You successfully followed " + this.repository.findUserById(followDTO.getUserID()).getUsername());
-    }
-
-    public MessageDTO unfollowUser(FollowRequestUserDTO unfollowDTO, User loggedUser) throws SQLException {
-        String unfollowQuery = "DELETE FROM users_follow_users WHERE followed_id = ? AND follower_id = ?";
-        PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(unfollowQuery);
-        pr.setInt(1, unfollowDTO.getUserID());
-        pr.setInt(2, loggedUser.getId());
-        pr.executeUpdate();
-        pr.close();
-        return new MessageDTO("You successfully unfollowed " + this.repository.findUserById(unfollowDTO.getUserID()).getUsername());
-    }
-
     public List<FilterResponseUserDTO> getFilteredUsers(FilterRequestUserDTO filterUserDTO) throws SQLException {
         List<FilterResponseUserDTO> filteredUsers = new ArrayList<>();
         String filterQuery = "SELECT u.id AS id, u.username AS username,\n" +
@@ -84,19 +61,19 @@ public class UserDAO {
                 "ON u.id = p.owner_id\n" +
                 "ORDER BY " + filterUserDTO.getSortBy() + " " + filterUserDTO.getOrderBy();
         System.out.println(filterQuery);
-        PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(filterQuery);
-        ResultSet set = pr.executeQuery();
-        while (set.next()){
-            FilterResponseUserDTO filteredUser = new FilterResponseUserDTO(
-                    set.getInt("id"),
-                    set.getString("username"),
-                    set.getInt("songs"),
-                    set.getInt("comments"),
-                    set.getInt("playlists"),
-                    set.getInt("followers"));
-            filteredUsers.add(filteredUser);
+        try(PreparedStatement pr = this.jdbcTemplate.getDataSource().getConnection().prepareStatement(filterQuery)) {
+            ResultSet set = pr.executeQuery();
+            while (set.next()) {
+                FilterResponseUserDTO filteredUser = new FilterResponseUserDTO(
+                        set.getInt("id"),
+                        set.getString("username"),
+                        set.getInt("songs"),
+                        set.getInt("comments"),
+                        set.getInt("playlists"),
+                        set.getInt("followers"));
+                filteredUsers.add(filteredUser);
+            }
         }
-        pr.close();
         return filteredUsers;
     }
 }

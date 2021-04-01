@@ -14,4 +14,5 @@ import org.springframework.stereotype.Component;
 public class FilterRequestUserDTO {
     private String sortBy;
     private String orderBy;
+    private int page;
 }

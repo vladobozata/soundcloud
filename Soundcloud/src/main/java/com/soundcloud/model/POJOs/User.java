@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -28,13 +29,13 @@ public class User {
     private String verification;
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
+    @JsonBackReference
     private List<Comment> comments = new ArrayList<>();
     @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
+    @JsonBackReference
     private List<Song> songs = new ArrayList<>();
     @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
+    @JsonBackReference
     private List<Playlist> playlists = new ArrayList<>();
 
     @ManyToMany(mappedBy = "likers")

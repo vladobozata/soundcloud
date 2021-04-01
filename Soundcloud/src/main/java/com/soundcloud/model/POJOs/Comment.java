@@ -22,7 +22,7 @@ public class Comment {
     private String text;
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    @JsonBackReference
+    @JsonManagedReference
     private User owner;
     @ManyToOne
     @JoinColumn(name = "song_id")

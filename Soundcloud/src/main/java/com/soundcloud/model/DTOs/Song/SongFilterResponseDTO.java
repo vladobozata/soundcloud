@@ -17,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 public class SongFilterResponseDTO {
+    private int id;
     private String title;
     private int songId;
     private int views;
@@ -26,6 +27,7 @@ public class SongFilterResponseDTO {
     private LocalDateTime dateUploaded;
 
     public SongFilterResponseDTO(Song song) {
+        id = song.getId();
         title = song.getTitle();
         songId = song.getId();
         views = song.getViews();
