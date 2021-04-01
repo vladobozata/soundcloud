@@ -2,6 +2,8 @@ package com.soundcloud.service;
 
 import java.util.*;
 
+import com.soundcloud.email.EmailService;
+import com.soundcloud.email.TokenService;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
@@ -10,6 +12,7 @@ import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
+import com.soundcloud.model.POJOs.VerificationToken;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
 import lombok.SneakyThrows;
@@ -23,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final EmailService emailService;
+    private final TokenService tokenService;
     private final UserDAO userDAO;
     private final static String FILTER_BY_SONGS = "songs";
     private final static String FILTER_BY_COMMENTS = "comments";
@@ -30,8 +35,10 @@ public class UserService {
     private final static String FILTER_BY_FOLLOWERS = "followers";
 
     @Autowired
-    public UserService(UserRepository userRepository, UserDAO userDAO) {
+    public UserService(UserRepository userRepository, UserDAO userDAO, EmailService emailService, TokenService tokenService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.tokenService = tokenService;
         this.userDAO = userDAO;
         Validator.userRepository = this.userRepository;
     }
@@ -42,6 +49,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public UserProfileResponseDTO register(RegisterRequestUserDTO registerDTO) {
         if (!Validator.validateName(registerDTO.getUsername())) {
             throw new BadRequestException("Username format is not correct!");
@@ -65,7 +73,11 @@ public class UserService {
         registerDTO.setPassword(encoder.encode(registerDTO.getPassword()));
 
         User user = new User(registerDTO);
+        VerificationToken token = new VerificationToken(user);
         user = this.userRepository.save(user);
+        this.tokenService.save(token);
+
+        this.emailService.send(registerDTO.getEmail(), token.getToken());
         return new UserProfileResponseDTO(user);
     }
 
@@ -115,9 +127,7 @@ public class UserService {
     }
 
     public UserProfileResponseDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
-        if (updateDTO.getAge() > 0) {
-            loggedUser.setAge(updateDTO.getAge());
-        }
+        Validator.validateAge(updateDTO.getAge());
         Validator.updateUsername(updateDTO.getUsername(), loggedUser);
         Validator.updatePassword(updateDTO, loggedUser);
         Validator.updateEmail(updateDTO.getEmail(), loggedUser);

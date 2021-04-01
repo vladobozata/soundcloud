@@ -11,7 +11,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,7 +25,7 @@ public class User {
     private String password;
     private String email;
     private int age;
-    private String verification;
+    private boolean enabled;
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "owner")
     @JsonBackReference
