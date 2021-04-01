@@ -11,6 +11,5 @@ import java.util.List;
 public interface SongRepository extends JpaRepository<Song, Integer> {
     Song getSongById(int id);
     List<Song> getAllByOwner(User owner);
-    List<Song> getAllByLikersContaining(User likedUser);
     List<Song> findAllByTitleIgnoreCaseContaining(String query);
 }

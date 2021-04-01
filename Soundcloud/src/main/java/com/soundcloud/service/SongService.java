@@ -105,8 +105,8 @@ public class SongService {
         return response;
     }
 
-    public List<SongFilterResponseDTO> getLikedByUser(User likedUser) {
-        List<Song> songs = songRepository.getAllByLikersContaining(likedUser);
+    public List<SongFilterResponseDTO> getLikedByUsername(String username) {
+        List<Song> songs = userRepository.findUserByUsername(username).getLikedSongs();
         return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 

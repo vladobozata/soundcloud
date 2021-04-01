@@ -1,17 +1,11 @@
 package com.soundcloud.model.DTOs.Song;
 
-import com.soundcloud.model.DTOs.Comment.CommentDTO;
-import com.soundcloud.model.DTOs.User.UserDTO;
-import com.soundcloud.model.POJOs.Comment;
 import com.soundcloud.model.POJOs.Song;
-import com.soundcloud.model.POJOs.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -19,6 +13,7 @@ import java.util.List;
 public class SongFilterResponseDTO {
     private int id;
     private String title;
+    private String uploadedBy;
     private int songId;
     private int views;
     private int comments;
@@ -29,6 +24,7 @@ public class SongFilterResponseDTO {
     public SongFilterResponseDTO(Song song) {
         id = song.getId();
         title = song.getTitle();
+        uploadedBy = song.getOwner().getUsername();
         songId = song.getId();
         views = song.getViews();
         comments = song.getComments().size();
