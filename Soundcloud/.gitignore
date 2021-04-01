@@ -18,7 +18,9 @@ target/
 *.iws
 *.iml
 *.ipr
-application.properties
+
+### Sensitive Data ###
+src/main/resources/application.properties
 
 ### NetBeans ###
 /nbproject/private/
