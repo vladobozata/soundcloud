@@ -14,10 +14,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     User findUserById(int id);
 
-    Page<User> getDistinctByOrderByCommentsAsc(Pageable pageable);
-    Page<User> getDistinctByOrderByFollowersAsc(Pageable pageable);
+//    Page<User> getDistinctByOrderByCommentsAsc(Pageable pageable);
+//    Page<User> getDistinctByOrderByFollowersAsc(Pageable pageable);
+//    Page<User> getDistinctByOrderBySongsAsc(Pageable pageable);
     Page<User> getDistinctByOrderByPlaylistsAsc(Pageable pageable);
-    Page<User> getDistinctByOrderBySongsAsc(Pageable pageable);
 
     void deleteUserById(int id);
 }

@@ -2,10 +2,6 @@ package com.soundcloud.model.DAOs;
 
 import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.FilterResponseUserDTO;
-import com.soundcloud.model.DTOs.User.FollowRequestUserDTO;
-import com.soundcloud.model.DTOs.MessageDTO;
-import com.soundcloud.model.POJOs.User;
-import com.soundcloud.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -19,12 +15,10 @@ import java.util.List;
 @Component
 public class UserDAO {
     private final JdbcTemplate jdbcTemplate;
-    private final UserRepository repository;
 
     @Autowired
-    public UserDAO(JdbcTemplate jdbcTemplate, UserRepository repository) {
+    public UserDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.repository = repository;
     }
 
     public List<FilterResponseUserDTO> getFilteredUsers(FilterRequestUserDTO filterUserDTO) throws SQLException {
