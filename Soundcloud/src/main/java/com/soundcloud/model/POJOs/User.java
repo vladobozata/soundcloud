@@ -62,7 +62,7 @@ public class User {
 
     @ManyToMany(mappedBy = "followers")
     @JsonBackReference
-    private List<User> followed;
+    private List<User> followed = new ArrayList<>();
 
     public User(RegisterRequestUserDTO userDTO) {
         this.username = userDTO.getUsername();

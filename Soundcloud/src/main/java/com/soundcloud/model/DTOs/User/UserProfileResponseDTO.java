@@ -28,6 +28,7 @@ public class UserProfileResponseDTO {
     private String email;
     private int age;
     private int followers;
+    private int followed;
     private LocalDateTime createdAt;
     private List<CommentResponseDTO> comments;
     private List<PlaylistResponseDTO> playlists;
@@ -39,8 +40,9 @@ public class UserProfileResponseDTO {
         this.email = user.getEmail();
         this.age = user.getAge();
         this.createdAt = user.getCreatedAt();
-        this.playlists = new ArrayList<>();
         this.followers = user.getFollowers().size();
+        this.followed = user.getFollowed().size();
+        this.playlists = new ArrayList<>();
         this.songs = new ArrayList<>();
         this.comments = new ArrayList<>();
         for(Comment comment : user.getComments()){

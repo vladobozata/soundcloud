@@ -8,10 +8,10 @@ import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.*;
 
 @RestController
 public class UserController extends AbstractController {
@@ -38,13 +38,14 @@ public class UserController extends AbstractController {
     @PostMapping("/users/follow")
     public FollowResponseUserDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
-        FollowResponseUserDTO followResponse = new FollowResponseUserDTO(this.userService.followUser(followDTO, loggedUser));
-        followResponse.setFollowedByMe(false);
-        return followResponse;
+        FollowResponseUserDTO followResponseDTO = new FollowResponseUserDTO(this.userService.followUser(followDTO, loggedUser));
+        followResponseDTO.setFollowedByMe(true);
+        followResponseDTO.setFollowing(loggedUser.getFollowed().size());
+        return followResponseDTO;
     }
 
     @PostMapping("/users/filter")
-    public Page<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
+    public List<FilterResponseUserWithoutPlaylistDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
         return this.userService.filterUsers(filterUserDTO);
     }
 
@@ -84,6 +85,7 @@ public class UserController extends AbstractController {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
         FollowResponseUserDTO unfollowResponseDTO = new FollowResponseUserDTO(this.userService.unfollowUser(unfollowDTO, loggedUser));
         unfollowResponseDTO.setFollowedByMe(false);
+        unfollowResponseDTO.setFollowing(loggedUser.getFollowed().size());
         return unfollowResponseDTO;
     }
 

@@ -15,4 +15,5 @@ public class FilterRequestUserDTO {
     private String sortBy;
     private String orderBy;
     private int page;
+    private int itemsPerPage;
 }
