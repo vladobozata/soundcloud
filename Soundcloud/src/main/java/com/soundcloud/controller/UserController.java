@@ -1,6 +1,6 @@
 package com.soundcloud.controller;
 
-import com.soundcloud.email.TokenService;
+import com.soundcloud.service.email.TokenService;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
@@ -26,76 +26,82 @@ public class UserController extends AbstractController {
         this.tokenService = tokenService;
     }
 
-    @PostMapping("/users/register")
+    @PostMapping("/users")
     public UserProfileResponseDTO register(@RequestBody RegisterRequestUserDTO registerDTO, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
         if (loggedUser != null) {
             throw new BadRequestException("You have to logout and then register again!");
         }
-        return this.userService.register(registerDTO);
+        return new UserProfileResponseDTO(this.userService.register(registerDTO));
     }
 
-    @PostMapping("/users/login")
-    public UserProfileResponseDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if (loggedUser != null) {
-            throw new BadRequestException("You already logged in!");
-        }
-        UserProfileResponseDTO responseDTO = this.userService.login(loginDTO);
-        this.sessionManager.loginUser(session, responseDTO.getId());
-        return responseDTO;
+    @PostMapping("/users/follow")
+    public FollowResponseUserDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
+        FollowResponseUserDTO followResponse = new FollowResponseUserDTO(this.userService.followUser(followDTO, loggedUser));
+        followResponse.setFollowedByMe(false);
+        return followResponse;
     }
 
-    @PostMapping("/users/logout")
+    @PostMapping("/users/filter")
+    public Page<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
+        return this.userService.filterUsers(filterUserDTO);
+    }
+
+    @PutMapping("/users/logout")
     public MessageDTO logout(HttpSession session) {
         this.sessionManager.validateUser(session, "You have to login and then logout!");
         this.sessionManager.logoutUser(session);
         return new MessageDTO("You successfully logout!");
     }
 
-    @DeleteMapping("/users/remove-profile")
-    public MessageDTO removeProfile(HttpSession session) {
-        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove your profile!");
-        return this.userService.removeProfile(loggedUser.getId());
+    @PutMapping("/login")
+    public UserProfileResponseDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
+        User loggedUser = this.sessionManager.getLoggedUser(session);
+        if (loggedUser != null) {
+            throw new BadRequestException("You already logged in!");
+        }
+        UserProfileResponseDTO responseDTO = new UserProfileResponseDTO(this.userService.login(loginDTO));
+        this.sessionManager.loginUser(session, responseDTO.getId());
+        return responseDTO;
     }
 
-    @PostMapping("/users/follow-user")
-    public MessageDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
-        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
-        return this.userService.followUser(followDTO, loggedUser);
-    }
-
-    @DeleteMapping("/users/unfollow-user")
-    public MessageDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
-        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
-        return this.userService.unfollowUser(unfollowDTO, loggedUser);
-    }
-
-    @PutMapping("/users/update-profile")
+    @PutMapping("/users")
     public UserProfileResponseDTO updateProfile(@RequestBody UpdateRequestUserDTO updateDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your profile!");
-        return this.userService.updateProfile(updateDTO, loggedUser);
+        return new UserProfileResponseDTO(this.userService.updateProfile(updateDTO, loggedUser));
     }
 
-    @GetMapping("/users/my-profile")
+    @DeleteMapping("/users")
+    public MessageDTO removeProfile(HttpSession session) {
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then remove your profile!");
+        this.userService.removeProfile(loggedUser.getId());
+        return new MessageDTO("Your profile was removed!");
+    }
+
+    @DeleteMapping("/users/unfollow")
+    public FollowResponseUserDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
+        User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
+        FollowResponseUserDTO unfollowResponseDTO = new FollowResponseUserDTO(this.userService.unfollowUser(unfollowDTO, loggedUser));
+        unfollowResponseDTO.setFollowedByMe(false);
+        return unfollowResponseDTO;
+    }
+
+    @GetMapping("/users")
     public UserProfileResponseDTO viewProfile(HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then view your profile!");
-        return this.userService.viewMyProfile(loggedUser);
-    }
-
-    @PostMapping("/users/filter-users")
-    public Page<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
-        return this.userService.filterUsers(filterUserDTO);
+        return new UserProfileResponseDTO(this.userService.viewMyProfile(loggedUser));
     }
 
     @GetMapping("/users/{username}")
-    public UserProfileResponseDTO userInformation(@PathVariable String username) {
-        return this.userService.userInformation(username);
+    public FilterResponseUserDTO userInformation(@PathVariable String username) {
+        return new FilterResponseUserDTO(this.userService.userInformation(username));
     }
 
     @GetMapping("/verify/{token}")
     public MessageDTO verify(@PathVariable String token, HttpSession session) {
         User loggedUser = this.sessionManager.getLoggedUser(session);
-        return tokenService.confirmToken(token, loggedUser);
+        this.tokenService.confirmToken(token, loggedUser);
+        return new MessageDTO("Email confirmed!");
     }
 }

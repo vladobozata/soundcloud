@@ -17,6 +17,7 @@ public class FilterResponseUserDTO {
     private int comments;
     private int playlists;
     private int followers;
+    private int followed;
 
     public FilterResponseUserDTO(int id, String username, int songs, int comments, int playlists, int followers) {
         this.id = id;
@@ -34,5 +35,6 @@ public class FilterResponseUserDTO {
         this.comments = user.getComments().size();
         this.playlists = user.getPlaylists().size();
         this.followers = user.getFollowers().size();
+        this.followed = user.getFollowed().size();
     }
 }

@@ -1,4 +1,4 @@
-package com.soundcloud.email;
+package com.soundcloud.service.email;
 
 import lombok.AllArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
