@@ -21,6 +21,5 @@ public class FollowResponseUserDTO {
     public FollowResponseUserDTO(User user) {
         this.userId = user.getId();
         this.username = user.getUsername();
-        this.following = user.getFollowed().size();
     }
 }

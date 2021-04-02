@@ -19,15 +19,6 @@ public class FilterResponseUserDTO {
     private int followers;
     private int followed;
 
-    public FilterResponseUserDTO(int id, String username, int songs, int comments, int playlists, int followers) {
-        this.id = id;
-        this.username = username;
-        this.songs = songs;
-        this.comments = comments;
-        this.playlists = playlists;
-        this.followers = followers;
-    }
-
     public FilterResponseUserDTO(User user){
         this.id = user.getId();
         this.username = user.getUsername();

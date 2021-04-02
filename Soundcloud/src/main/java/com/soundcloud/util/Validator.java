@@ -77,8 +77,12 @@ public class Validator {
         return matcher.matches();
     }
 
-    public static void validateAge(int age) {
-        if (age > 0) {
+    public static void validateAge(int age, User user) {
+        if (age >= 1) {
+            user.setAge(age);
+            return;
+        }
+        if(age < 0){
             throw new BadRequestException("Age must be positive number!");
         }
     }

@@ -51,13 +51,13 @@ public class PlaylistController extends AbstractController{
         return new PlaylistResponseDTO(this.playlistService.addSongToPlaylist(addSongDTO, loggedUser));
     }
 
-    @PutMapping("/playlists/update-name")
+    @PutMapping("/playlists")
     public PlaylistResponseDTO updatePlaylistName(@RequestBody UpdatePlaylistNameDTO updateNameDTO, HttpSession session){
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then update your playlist!");
         return new PlaylistResponseDTO(this.playlistService.updatePlaylistName(updateNameDTO, loggedUser));
     }
 
-    @GetMapping("/playlists/{playlistID}/songs")
+    @GetMapping("/playlists/{playlistID}")
     public PlaylistResponseDTO getPlaylistSongs(@PathVariable int playlistID){
         return new PlaylistResponseDTO(this.playlistService.getPlaylistSongs(playlistID));
     }

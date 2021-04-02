@@ -19,7 +19,7 @@ public class EmailService {
         String verifyURL = "localhost:7878/verify/" + token;
 //        String content = "<br>Please click the link below to verify your registration:<br>"
 //                +"<a href=\"" + verifyURL +"\">Click here</a> Thanks!";
-        String content = "<p>Please follow <a href=\"http://" + verifyURL + " >this link</a>.</p>";
+        String content = "Please follow http://" + verifyURL + " this link";
         message.setText(content);
         this.mailSender.send(message);
     }

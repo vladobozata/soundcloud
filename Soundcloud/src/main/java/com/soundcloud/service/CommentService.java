@@ -81,7 +81,7 @@ public class CommentService {
 
     public MessageDTO setLike(int commentId, int likeValue, User loggedUser) {
         Comment targetComment = commentRepository.findCommentById(commentId);
-        String action = new String("");
+        String action;
 
         if (targetComment == null) {
             throw new NotFoundException("The comment you are trying to like or dislike was not found.");

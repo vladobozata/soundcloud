@@ -21,7 +21,7 @@ public class TokenService {
 
     @Transactional
     public void confirmToken(String userToken, User user) {
-        VerificationToken token = tokenRepository.findByToken(userToken);
+        VerificationToken token = this.tokenRepository.findByToken(userToken);
         if(token == null){
             throw new BadRequestException("Confirmation details are wrong!");
         }
