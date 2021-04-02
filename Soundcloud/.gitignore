@@ -20,7 +20,7 @@ target/
 *.ipr
 
 ### Sensitive Data ###
-src/main/resources/application.properties
+src/main/resources/application-Alexander.properties
 
 ### NetBeans ###
 /nbproject/private/

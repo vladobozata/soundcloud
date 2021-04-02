@@ -35,7 +35,7 @@ public class UserController extends AbstractController {
         return new UserProfileResponseDTO(this.userService.register(registerDTO));
     }
 
-    @PostMapping("/users/follow-user")
+    @PostMapping("/users/follow")
     public FollowResponseUserDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
         FollowResponseUserDTO followResponse = new FollowResponseUserDTO(this.userService.followUser(followDTO, loggedUser));
@@ -43,7 +43,7 @@ public class UserController extends AbstractController {
         return followResponse;
     }
 
-    @PostMapping("/users/filter-users")
+    @PostMapping("/users/filter")
     public Page<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
         return this.userService.filterUsers(filterUserDTO);
     }
@@ -79,7 +79,7 @@ public class UserController extends AbstractController {
         return new MessageDTO("Your profile was removed!");
     }
 
-    @DeleteMapping("/users/unfollow-user")
+    @DeleteMapping("/users/unfollow")
     public FollowResponseUserDTO unfollowUser(@RequestBody FollowRequestUserDTO unfollowDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then unfollow users!");
         FollowResponseUserDTO unfollowResponseDTO = new FollowResponseUserDTO(this.userService.unfollowUser(unfollowDTO, loggedUser));
