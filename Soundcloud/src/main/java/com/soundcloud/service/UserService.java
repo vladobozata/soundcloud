@@ -2,6 +2,8 @@ package com.soundcloud.service;
 
 import java.util.*;
 
+import com.soundcloud.email.EmailService;
+import com.soundcloud.email.TokenService;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
@@ -10,10 +12,12 @@ import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
+import com.soundcloud.model.POJOs.VerificationToken;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final EmailService emailService;
+    private final TokenService tokenService;
     private final UserDAO userDAO;
     private final static String FILTER_BY_SONGS = "songs";
     private final static String FILTER_BY_COMMENTS = "comments";
@@ -29,8 +35,10 @@ public class UserService {
     private final static String FILTER_BY_FOLLOWERS = "followers";
 
     @Autowired
-    public UserService(UserRepository userRepository, UserDAO userDAO) {
+    public UserService(UserRepository userRepository, UserDAO userDAO, EmailService emailService, TokenService tokenService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.tokenService = tokenService;
         this.userDAO = userDAO;
         Validator.userRepository = this.userRepository;
     }
@@ -41,6 +49,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public UserProfileResponseDTO register(RegisterRequestUserDTO registerDTO) {
         if (!Validator.validateName(registerDTO.getUsername())) {
             throw new BadRequestException("Username format is not correct!");
@@ -64,7 +73,11 @@ public class UserService {
         registerDTO.setPassword(encoder.encode(registerDTO.getPassword()));
 
         User user = new User(registerDTO);
+        VerificationToken token = new VerificationToken(user);
         user = this.userRepository.save(user);
+        this.tokenService.save(token);
+
+        this.emailService.send(registerDTO.getEmail(), token.getToken());
         return new UserProfileResponseDTO(user);
     }
 
@@ -114,9 +127,7 @@ public class UserService {
     }
 
     public UserProfileResponseDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
-        if (updateDTO.getAge() > 0) {
-            loggedUser.setAge(updateDTO.getAge());
-        }
+        Validator.validateAge(updateDTO.getAge());
         Validator.updateUsername(updateDTO.getUsername(), loggedUser);
         Validator.updatePassword(updateDTO, loggedUser);
         Validator.updateEmail(updateDTO.getEmail(), loggedUser);
@@ -136,20 +147,26 @@ public class UserService {
     }
 
     @SneakyThrows
-    public List<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
-        if (!filterUserDTO.getOrderBy().equalsIgnoreCase("ASC")) {
-            if (!filterUserDTO.getOrderBy().equalsIgnoreCase("DESC")) {
-                throw new BadRequestException("Invalid order type!");
-            }
-        }
+    public Page<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
+        Pageable pageable = PageRequest.of(filterUserDTO.getPage(), 4);
+
         switch (filterUserDTO.getSortBy()) {
             case FILTER_BY_COMMENTS:
             case FILTER_BY_FOLLOWERS:
             case FILTER_BY_PLAYLISTS:
             case FILTER_BY_SONGS:
-                return this.userDAO.getFilteredUsers(filterUserDTO);
+                break;
             default:
                 throw new NotFoundException("Sort type not found!");
         }
+        //Page<User> entities = userRepository.getDistinctByOrderByCommentsAsc(pageable);
+        Page<User> entities = userRepository.getDistinctByOrderByPlaylistsAsc(pageable);
+        //Page<User> entities = userRepository.getDistinctByOrderByFollowersAsc(pageable);
+        //Page<User> entities = userRepository.getDistinctBy(pageable);
+        List<FilterResponseUserDTO> filteredUsers = new ArrayList<>();
+        for (User user : entities) {
+            filteredUsers.add(new FilterResponseUserDTO(user));
+        }
+        return new PageImpl<>(filteredUsers);
     }
 }

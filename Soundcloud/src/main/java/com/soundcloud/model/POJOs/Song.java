@@ -24,7 +24,7 @@ public class Song {
     private int views;
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    @JsonBackReference
+    @JsonManagedReference
     private User owner;
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "song")

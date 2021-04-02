@@ -44,6 +44,16 @@ CREATE TABLE comments(
     created_at DATETIME NOT NULL DEFAULT now()
 );
 
+CREATE TABLE token_verification(
+	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
+    created_at DATETIME NOT NULL DEFAULT now(),
+    expires_at DATETIME NOT NULL,
+    confirmed_at DATETIME
+);
+
 CREATE TABLE users_like_songs(
 	song_id INT NOT NULL,
     FOREIGN KEY(song_id) REFERENCES songs(id)

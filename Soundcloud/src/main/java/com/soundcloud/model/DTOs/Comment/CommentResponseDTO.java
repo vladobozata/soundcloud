@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CommentResponseDTO {
     private int id;
-    private String owner;
     private String text;
     private LocalDateTime createdAt;
     private int likes;
@@ -24,7 +23,6 @@ public class CommentResponseDTO {
 
     public CommentResponseDTO(Comment comment) {
         this.id = comment.getId();
-        this.owner = comment.getOwner().getUsername();
         this.text = comment.getText();
         this.createdAt = comment.getCreatedAt();
         this.likes = comment.getLikers().size();

@@ -2,7 +2,6 @@ package com.soundcloud.model.POJOs;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +22,7 @@ public class Comment {
     private String text;
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    @JsonBackReference
+    @JsonManagedReference
     private User owner;
     @ManyToOne
     @JoinColumn(name = "song_id")

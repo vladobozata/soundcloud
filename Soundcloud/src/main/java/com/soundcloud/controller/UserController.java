@@ -1,7 +1,6 @@
 package com.soundcloud.controller;
 
-import java.util.*;
-
+import com.soundcloud.email.TokenService;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
@@ -9,6 +8,7 @@ import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
@@ -17,11 +17,13 @@ import javax.servlet.http.HttpSession;
 public class UserController extends AbstractController {
     private final UserService userService;
     private final SessionManager sessionManager;
+    private final TokenService tokenService;
 
     @Autowired
-    public UserController(UserService userService, SessionManager sessionManager) {
+    public UserController(UserService userService, SessionManager sessionManager, TokenService tokenService) {
         this.userService = userService;
         this.sessionManager = sessionManager;
+        this.tokenService = tokenService;
     }
 
     @PostMapping("/users/register")
@@ -82,12 +84,18 @@ public class UserController extends AbstractController {
     }
 
     @PostMapping("/users/filter-users")
-    public List<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
+    public Page<FilterResponseUserDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
         return this.userService.filterUsers(filterUserDTO);
     }
 
     @GetMapping("/users/{username}")
     public UserProfileResponseDTO userInformation(@PathVariable String username) {
         return this.userService.userInformation(username);
+    }
+
+    @GetMapping("/verify/{token}")
+    public MessageDTO verify(@PathVariable String token, HttpSession session) {
+        User loggedUser = this.sessionManager.getLoggedUser(session);
+        return tokenService.confirmToken(token, loggedUser);
     }
 }

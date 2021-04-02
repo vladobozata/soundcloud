@@ -4,5 +4,10 @@
       "name": "server.contextPath",
       "type": "java.lang.String",
       "description": "Description for server.contextPath."
-  }
-] }
+    },
+    {
+      "name": "mail.smtp.ssl.enable",
+      "type": "java.lang.String",
+      "description": "Description for mail.smtp.ssl.enable."
+    }
+  ] }

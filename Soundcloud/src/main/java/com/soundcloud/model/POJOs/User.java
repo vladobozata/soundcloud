@@ -25,16 +25,16 @@ public class User {
     private String password;
     private String email;
     private int age;
-    private String verification;
+    private boolean enabled;
     private LocalDateTime createdAt;
     @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
+    @JsonBackReference
     private List<Comment> comments = new ArrayList<>();
     @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
+    @JsonBackReference
     private List<Song> songs = new ArrayList<>();
     @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
+    @JsonBackReference
     private List<Playlist> playlists = new ArrayList<>();
 
     @ManyToMany(mappedBy = "likers")

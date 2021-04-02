@@ -1,6 +1,5 @@
 package com.soundcloud.model.POJOs;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,11 +22,11 @@ public class Playlist {
     private String name;
     @ManyToOne
     @JoinColumn(name="owner_id")
-    @JsonBackReference
+    @JsonManagedReference
     private User owner;
     private LocalDateTime createdAt;
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(
             name = "playlists_have_songs",
             joinColumns = {@JoinColumn(name="playlist_id")},

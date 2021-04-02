@@ -1,5 +1,6 @@
 package com.soundcloud.model.DTOs.User;
 
+import com.soundcloud.model.POJOs.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,5 +25,14 @@ public class FilterResponseUserDTO {
         this.comments = comments;
         this.playlists = playlists;
         this.followers = followers;
+    }
+
+    public FilterResponseUserDTO(User user){
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.songs = user.getSongs().size();
+        this.comments = user.getComments().size();
+        this.playlists = user.getPlaylists().size();
+        this.followers = user.getFollowers().size();
     }
 }
