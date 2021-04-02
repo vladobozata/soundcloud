@@ -2,20 +2,19 @@ package com.soundcloud.service;
 
 import java.util.*;
 
-import com.soundcloud.email.EmailService;
-import com.soundcloud.email.TokenService;
+import com.soundcloud.model.repositories.VerificationTokenRepository;
+import com.soundcloud.service.email.EmailService;
+import com.soundcloud.service.email.TokenService;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DAOs.UserDAO;
 import com.soundcloud.model.DTOs.User.FilterRequestUserDTO;
 import com.soundcloud.model.DTOs.User.*;
-import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.POJOs.VerificationToken;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final VerificationTokenRepository tokenRepository;
     private final EmailService emailService;
-    private final TokenService tokenService;
     private final UserDAO userDAO;
     private final static String FILTER_BY_SONGS = "songs";
     private final static String FILTER_BY_COMMENTS = "comments";
@@ -35,10 +34,10 @@ public class UserService {
     private final static String FILTER_BY_FOLLOWERS = "followers";
 
     @Autowired
-    public UserService(UserRepository userRepository, UserDAO userDAO, EmailService emailService, TokenService tokenService) {
+    public UserService(UserRepository userRepository, VerificationTokenRepository tokenRepository, UserDAO userDAO, EmailService emailService) {
         this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
         this.emailService = emailService;
-        this.tokenService = tokenService;
         this.userDAO = userDAO;
         Validator.userRepository = this.userRepository;
     }
@@ -50,7 +49,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserProfileResponseDTO register(RegisterRequestUserDTO registerDTO) {
+    public User register(RegisterRequestUserDTO registerDTO) {
         if (!Validator.validateName(registerDTO.getUsername())) {
             throw new BadRequestException("Username format is not correct!");
         }
@@ -74,25 +73,29 @@ public class UserService {
 
         User user = new User(registerDTO);
         VerificationToken token = new VerificationToken(user);
+        this.tokenRepository.save(token);
         user = this.userRepository.save(user);
-        this.tokenService.save(token);
 
         this.emailService.send(registerDTO.getEmail(), token.getToken());
-        return new UserProfileResponseDTO(user);
+        return user;
     }
 
-    public UserProfileResponseDTO login(LoginRequestUserDTO loginDTO) {
+    public User login(LoginRequestUserDTO loginDTO) {
         User user = this.userRepository.findUserByUsername(loginDTO.getUsername());
         if (user != null) {
             PasswordEncoder encoder = new BCryptPasswordEncoder();
             if (encoder.matches(loginDTO.getPassword(), user.getPassword())) {
-                return new UserProfileResponseDTO(user);
+                if(user.isEnabled()){
+                    return user;
+                }
+                throw new AuthenticationException("You must verify your email!");
             }
         }
         throw new AuthenticationException("Wrong credentials!");
     }
 
-    public MessageDTO followUser(FollowRequestUserDTO followDTO, User loggedUser) {
+    @Transactional
+    public User followUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
         validateUser(user);
         if (followDTO.getUserID() == loggedUser.getId()) {
@@ -102,11 +105,12 @@ public class UserService {
             throw new BadRequestException("You already follow " + user.getUsername() + "!");
         }
         user.getFollowers().add(loggedUser);
-        this.userRepository.save(user);
-        return new MessageDTO("You successfully followed " + user.getUsername() + "!");
+        loggedUser.getFollowed().add(user);
+        return this.userRepository.save(user);
     }
 
-    public MessageDTO unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
+    @Transactional
+    public User unfollowUser(FollowRequestUserDTO followDTO, User loggedUser) {
         User user = this.userRepository.findUserById(followDTO.getUserID());
         validateUser(user);
         if (followDTO.getUserID() == loggedUser.getId()) {
@@ -116,53 +120,52 @@ public class UserService {
             throw new BadRequestException("You do not follow " + user.getUsername() + "!");
         }
         user.getFollowers().remove(loggedUser);
-        this.userRepository.save(user);
-        return new MessageDTO("You successfully unfollowed " + user.getUsername() + "!");
+        loggedUser.getFollowed().remove(user);
+        return this.userRepository.save(user);
     }
 
-    public UserProfileResponseDTO userInformation(String username) {
-        User user = this.userRepository.findUserByUsername(username);
-        validateUser(user);
-        return new UserProfileResponseDTO(user);
-    }
-
-    public UserProfileResponseDTO updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
+    public User updateProfile(UpdateRequestUserDTO updateDTO, User loggedUser) {
         Validator.validateAge(updateDTO.getAge());
         Validator.updateUsername(updateDTO.getUsername(), loggedUser);
         Validator.updatePassword(updateDTO, loggedUser);
         Validator.updateEmail(updateDTO.getEmail(), loggedUser);
-        User user = this.userRepository.save(loggedUser);
-        return new UserProfileResponseDTO(user);
+        return this.userRepository.save(loggedUser);
     }
 
-    public UserProfileResponseDTO viewMyProfile(User loggedUser) {
-        User user = this.userRepository.findUserByUsername(loggedUser.getUsername());
-        return new UserProfileResponseDTO(user);
+    public User userInformation(String username) {
+        User user = this.userRepository.findUserByUsername(username);
+        validateUser(user);
+        return user;
+    }
+
+    public User viewMyProfile(User loggedUser) {
+        return this.userRepository.findUserByUsername(loggedUser.getUsername());
     }
 
     @Transactional
-    public MessageDTO removeProfile(int userID) {
+    public void removeProfile(int userID) {
         this.userRepository.deleteUserById(userID);
-        return new MessageDTO("Your profile was removed!");
     }
 
-    @SneakyThrows
     public Page<FilterResponseUserDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
         Pageable pageable = PageRequest.of(filterUserDTO.getPage(), 4);
-
+        Page<User> entities;
         switch (filterUserDTO.getSortBy()) {
             case FILTER_BY_COMMENTS:
+                entities = userRepository.getDistinctByOrderByCommentsAsc(pageable);
+                break;
             case FILTER_BY_FOLLOWERS:
+                entities = userRepository.getDistinctByOrderByFollowersAsc(pageable);
+                break;
             case FILTER_BY_PLAYLISTS:
+                entities = userRepository.getDistinctByOrderByPlaylistsAsc(pageable);
+                break;
             case FILTER_BY_SONGS:
+                entities = userRepository.getDistinctByOrderBySongsAsc(pageable);
                 break;
             default:
                 throw new NotFoundException("Sort type not found!");
         }
-        //Page<User> entities = userRepository.getDistinctByOrderByCommentsAsc(pageable);
-        Page<User> entities = userRepository.getDistinctByOrderByPlaylistsAsc(pageable);
-        //Page<User> entities = userRepository.getDistinctByOrderByFollowersAsc(pageable);
-        //Page<User> entities = userRepository.getDistinctBy(pageable);
         List<FilterResponseUserDTO> filteredUsers = new ArrayList<>();
         for (User user : entities) {
             filteredUsers.add(new FilterResponseUserDTO(user));

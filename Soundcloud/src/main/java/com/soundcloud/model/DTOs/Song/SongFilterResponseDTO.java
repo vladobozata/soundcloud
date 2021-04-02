@@ -19,6 +19,7 @@ public class SongFilterResponseDTO {
     private int comments;
     private int likes;
     private int dislikes;
+    private int inPlaylists;
     private LocalDateTime createdAt;
 
     public SongFilterResponseDTO(Song song) {
@@ -30,6 +31,7 @@ public class SongFilterResponseDTO {
         this.comments = song.getComments().size();
         this.likes = song.getLikers().size();
         this.dislikes = song.getDislikers().size();
+        this.inPlaylists = song.getPlaylists().size();
         this.createdAt = song.getCreatedAt();
     }
 }
