@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.soundcloud.model.repositories.VerificationTokenRepository;
 import com.soundcloud.service.email.EmailService;
-import com.soundcloud.service.email.TokenService;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
