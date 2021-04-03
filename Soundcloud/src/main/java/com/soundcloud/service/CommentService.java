@@ -35,7 +35,7 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment postComment(PostCommentRequestDTO requestDTO, User loggedUser) {
+    public MessageDTO postComment(PostCommentRequestDTO requestDTO, User loggedUser) {
         Song songCommented = songRepository.getSongById(requestDTO.getSongId());
         if (songCommented == null) throw new NotFoundException("Cannot find song id#" + requestDTO.getSongId());
 
@@ -52,7 +52,7 @@ public class CommentService {
         userRepository.save(loggedUser);
         songRepository.save(songCommented);
         commentRepository.save(comment);
-        return comment;
+        return new MessageDTO("Comment posted. Comment id: #" + comment.getId());
     }
 
     public MessageDTO deleteComment(ResourceRequestDTO requestDTO, User loggedUser) {
