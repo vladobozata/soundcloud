@@ -24,42 +24,35 @@ public class SongDAO {
     }
 
     public List<SongFilterResponseDTO> filterSongs(String queryTitle, String sort, String order, int page, int resultsPerPage) throws SQLException {
-        System.out.println("queryTitle = " + queryTitle + ", sort = " + sort + ", order = " + order + ", page = " + page + ", resultsPerPage = " + resultsPerPage);
         List<SongFilterResponseDTO> songs = new LinkedList<>();
 
         String sql = "SELECT sng.title, " +
-                "usr.username AS uploadedBy, " +
-                "sng.id AS songId, " +
-                "sng.views, " +
-                "COUNT(DISTINCT cmt.id) AS comments, " +
-                "COUNT(DISTINCT uls.user_id) AS likes, " +
-                "COUNT(DISTINCT uds.user_id) AS dislikes, " +
-                "COUNT(DISTINCT phs.playlist_id) AS inPlaylists, " +
-                "sng.created_at AS date " +
+                     "usr.username AS uploadedBy, " +
+                     "sng.id AS songId, " +
+                     "sng.views, " +
+                     "COUNT(DISTINCT cmt.id) AS comments, " +
+                     "COUNT(DISTINCT uls.user_id) AS likes, " +
+                     "COUNT(DISTINCT uds.user_id) AS dislikes, " +
+                     "COUNT(DISTINCT phs.playlist_id) AS inPlaylists, " +
+                     "sng.created_at AS date " +
 
-                "FROM songs sng " +
-                "LEFT JOIN users usr ON sng.owner_id = usr.id " +
-                "LEFT JOIN comments cmt ON sng.id = cmt.song_id " +
-                "LEFT JOIN users_like_songs uls ON sng.id = uls.song_id " +
-                "LEFT JOIN users_dislike_songs uds ON sng.id = uds.song_id " +
-                "LEFT JOIN playlists_have_songs phs ON sng.id = phs.song_id " +
+                     "FROM songs sng " +
+                     "LEFT JOIN users usr ON sng.owner_id = usr.id " +
+                     "LEFT JOIN comments cmt ON sng.id = cmt.song_id " +
+                     "LEFT JOIN users_like_songs uls ON sng.id = uls.song_id " +
+                     "LEFT JOIN users_dislike_songs uds ON sng.id = uds.song_id " +
+                     "LEFT JOIN playlists_have_songs phs ON sng.id = phs.song_id " +
 
-                "WHERE sng.title LIKE \"%%%s%%\" " +
+                     "WHERE sng.title LIKE \"%%%s%%\" " +
 
-                "GROUP BY sng.id " +
+                     "GROUP BY sng.id " +
 
-                "ORDER BY %s %s " +
+                     "ORDER BY %s %s " +
 
-                "LIMIT %d OFFSET %d";
+                     "LIMIT %d OFFSET %d";
 
-        System.out.println(sql);
         sql = String.format(sql, queryTitle, sort, order, resultsPerPage, (resultsPerPage * (page - 1)));
-        System.out.println(sql);
         PreparedStatement statement = jdbcTemplate.getDataSource().getConnection().prepareStatement(sql);
-//        statement.setString(1, sort);
-//        statement.setString(2, order);
-//        statement.setInt(3, resultsPerPage);
-//        statement.setInt(4, (resultsPerPage * (page - 1)));
         ResultSet results = statement.executeQuery();
 
         while(results.next()) {

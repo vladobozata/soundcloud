@@ -2,7 +2,7 @@ package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
-import com.soundcloud.exceptions.FileWriteException;
+import com.soundcloud.exceptions.FileReadWriteException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.MessageDTO;
 import org.springframework.http.HttpStatus;
@@ -31,9 +31,9 @@ public abstract class AbstractController {
         return new MessageDTO(e.getMessage());
     }
 
-    @ExceptionHandler(FileWriteException.class)
+    @ExceptionHandler(FileReadWriteException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public MessageDTO handleFileException(FileWriteException e) {
+    public MessageDTO handleFileException(FileReadWriteException e) {
         return new MessageDTO(e.getMessage());
     }
 

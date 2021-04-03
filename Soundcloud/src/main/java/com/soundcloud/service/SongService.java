@@ -1,7 +1,15 @@
 package com.soundcloud.service;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.soundcloud.exceptions.BadRequestException;
-import com.soundcloud.exceptions.FileWriteException;
+import com.soundcloud.exceptions.FileReadWriteException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DAOs.SongDAO;
 import com.soundcloud.model.DTOs.MessageDTO;
@@ -12,6 +20,7 @@ import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
 import com.soundcloud.model.repositories.UserRepository;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,13 +29,11 @@ import javax.transaction.Transactional;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
 public class SongService {
-    private static final String FILE_SAVE_DIR = "Soundcloud/src/main/java/com/soundcloud/assets";
-    private static final String FILE_SAVE_FORMAT = ".mp3";
+    private static final String STORAGE_BUCKET_NAME = "amazon-storage-soundcloud";
     private static final String SORT_BY_LIKES = "likes";
     private static final String SORT_BY_DISLIKES = "dislikes";
     private static final String SORT_BY_COMMENTS = "comments";
@@ -35,35 +42,43 @@ public class SongService {
     private static final String SORT_BY_PLAYLISTS = "playlists";
     private static final int RESULTS_PER_PAGE = 3;
 
+
     private final SongDAO songDAO;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final AmazonS3 storageClient;
 
     @Autowired
-    public SongService(SongDAO songDAO, SongRepository songRepository, UserRepository userRepository) {
+    public SongService(SongDAO songDAO, SongRepository songRepository, UserRepository userRepository, AmazonS3 storageClient) {
         this.songDAO = songDAO;
         this.songRepository = songRepository;
         this.userRepository = userRepository;
+        this.storageClient = storageClient;
     }
 
-    public Song uploadSong(String name, MultipartFile receivedFile, User loggedUser) {
-        File localFile = new File(FILE_SAVE_DIR,  System.nanoTime() + FILE_SAVE_FORMAT);
-        System.out.println(localFile.getAbsolutePath());
+    public Song uploadSong(String title, MultipartFile receivedFile, User loggedUser) {
+        String originalName = receivedFile.getOriginalFilename();
+        if (!originalName.contains(".")) throw new BadRequestException("Uploaded file does not have an extension.");
+        if (title == null || songRepository.getSongByTitle(title) != null) throw new BadRequestException("A track with this title already exists!");
 
-        try {
-            if (!localFile.getParentFile().exists()) {
-                localFile.getParentFile().mkdirs();
-            }
-            localFile.createNewFile();
-            OutputStream stream = new FileOutputStream(localFile);
-            stream.write(receivedFile.getBytes());
-            stream.flush();
-            stream.close();
-        } catch (IOException e) {
-            throw new FileWriteException("Could not save song to server - " + e.getMessage());
-        }
-        Song song = new Song(name, localFile.getPath(), loggedUser);
+        String extension = originalName.substring(originalName.indexOf('.'));
+        if (!extension.equals(".mp3")) throw new BadRequestException("Unrecognized file extension. Please select an mp3 file.");
+
+        String fileName = String.valueOf(System.nanoTime());
+        String fullName = fileName + extension;
+
+        Song song = new Song(title, fullName, loggedUser);
         songRepository.save(song);
+
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setContentType("audio/mpeg");
+        meta.setContentLength(receivedFile.getSize());
+        try {
+            storageClient.putObject(STORAGE_BUCKET_NAME, fullName, receivedFile.getInputStream(), meta);
+        } catch (AmazonServiceException | IOException e) {
+            throw new FileReadWriteException("Could not save song to server - " + e.getMessage());
+        }
+
         return song;
     }
 
@@ -78,19 +93,19 @@ public class SongService {
 
     public byte[] playSong(int id) {
         Song s = getById(id);
-        s.setViews(s.getViews()+1);
-        songRepository.save(s);
+        if (s == null) throw new NotFoundException("The song you are trying to play was not found.");
 
-        File songFile = new File(s.getUrl());
-        byte[] array = new byte[(int) songFile.length()];
         try {
-            FileInputStream stream = new FileInputStream(songFile);
-            stream.read(array);
-            stream.close();
-        } catch (IOException e) {
-            throw new NotFoundException("Error parsing file at " + s.getUrl());
+            S3Object downloadedFile = storageClient.getObject(STORAGE_BUCKET_NAME, s.getUrl());
+            S3ObjectInputStream stream = downloadedFile.getObjectContent();
+
+            s.setViews(s.getViews()+1);
+            songRepository.save(s);
+
+            return IOUtils.toByteArray(stream);
+        }catch (AmazonServiceException | IOException e) {
+            throw new FileReadWriteException("Could not download the song from the server. Details: " + e.getMessage());
         }
-        return array;
     }
 
     public User getOwnerForSongId(int songId) {

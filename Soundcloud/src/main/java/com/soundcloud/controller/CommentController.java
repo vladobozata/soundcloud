@@ -27,9 +27,9 @@ public class CommentController extends AbstractController {
 
     // POST
     @PostMapping("/comments")
-    public MessageDTO postComment(@RequestBody PostCommentRequestDTO requestDTO, HttpSession session) {
+    public CommentResponseDTO postComment(@RequestBody PostCommentRequestDTO requestDTO, HttpSession session) {
         User loggedUser = sessionManager.validateUser(session, "You must login before posting a comment.");
-        return commentService.postComment(requestDTO, loggedUser);
+        return new CommentResponseDTO(commentService.postComment(requestDTO, loggedUser));
     }
 
     // DELETE
