@@ -46,6 +46,13 @@ public class UserController extends AbstractController {
         return responseDTO;
     }
 
+    @PostMapping("/logout")
+    public MessageDTO logout(HttpSession session) {
+        this.sessionManager.validateUser(session, "You have to login and then logout!");
+        this.sessionManager.logoutUser(session);
+        return new MessageDTO("You successfully logout!");
+    }
+
     @PostMapping("/users/follow")
     public FollowResponseUserDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
@@ -58,13 +65,6 @@ public class UserController extends AbstractController {
     @PostMapping("/users/filter")
     public List<FilterResponseUserWithoutPlaylistDTO> filterUsers(@RequestBody FilterRequestUserDTO filterUserDTO) {
         return this.userService.filterUsers(filterUserDTO);
-    }
-
-    @PutMapping("/users/logout")
-    public MessageDTO logout(HttpSession session) {
-        this.sessionManager.validateUser(session, "You have to login and then logout!");
-        this.sessionManager.logoutUser(session);
-        return new MessageDTO("You successfully logout!");
     }
 
     @PutMapping("/users")
