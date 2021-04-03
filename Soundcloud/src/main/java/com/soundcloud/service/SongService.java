@@ -115,6 +115,11 @@ public class SongService {
 
     public void deleteSong(int songId) {
         SongGetResponseDTO dto = new SongGetResponseDTO(getById(songId));
+        try {
+            storageClient.deleteObject(STORAGE_BUCKET_NAME, dto.getUrl());
+        } catch (SdkClientException e) {
+            throw new FileReadWriteException("Failed to delete song file from the server. Details: " + e.getMessage());
+        }
         songRepository.deleteById(songId);
     }
 
