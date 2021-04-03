@@ -35,6 +35,17 @@ public class UserController extends AbstractController {
         return new UserProfileResponseDTO(this.userService.register(registerDTO));
     }
 
+    @PostMapping("/login")
+    public UserProfileResponseDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
+        User loggedUser = this.sessionManager.getLoggedUser(session);
+        if (loggedUser != null) {
+            throw new BadRequestException("You already logged in!");
+        }
+        UserProfileResponseDTO responseDTO = new UserProfileResponseDTO(this.userService.login(loginDTO));
+        this.sessionManager.loginUser(session, responseDTO.getId());
+        return responseDTO;
+    }
+
     @PostMapping("/users/follow")
     public FollowResponseUserDTO followUser(@RequestBody FollowRequestUserDTO followDTO, HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then follow users!");
@@ -54,17 +65,6 @@ public class UserController extends AbstractController {
         this.sessionManager.validateUser(session, "You have to login and then logout!");
         this.sessionManager.logoutUser(session);
         return new MessageDTO("You successfully logout!");
-    }
-
-    @PutMapping("/login")
-    public UserProfileResponseDTO login(@RequestBody LoginRequestUserDTO loginDTO, HttpSession session) {
-        User loggedUser = this.sessionManager.getLoggedUser(session);
-        if (loggedUser != null) {
-            throw new BadRequestException("You already logged in!");
-        }
-        UserProfileResponseDTO responseDTO = new UserProfileResponseDTO(this.userService.login(loginDTO));
-        this.sessionManager.loginUser(session, responseDTO.getId());
-        return responseDTO;
     }
 
     @PutMapping("/users")
