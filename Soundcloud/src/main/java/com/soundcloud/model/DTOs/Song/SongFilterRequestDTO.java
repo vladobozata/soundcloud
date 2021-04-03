@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class SongFilterRequestDTO {
     private String title;
-    private String sort;
-    private String order;
+    private String sortBy;
+    private String orderBy;
+    private Integer page;
 }

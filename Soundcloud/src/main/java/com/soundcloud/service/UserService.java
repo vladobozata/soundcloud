@@ -171,7 +171,7 @@ public class UserService {
                     e.printStackTrace();
                 }
             default:
-                throw new NotFoundException("Sort type not found!");
+                throw new BadRequestException("Sort type not recognized!");
         }
     }
 }

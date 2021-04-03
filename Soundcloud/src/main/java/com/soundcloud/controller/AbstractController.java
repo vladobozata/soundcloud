@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.sql.SQLException;
+
 public abstract class AbstractController {
 
     @ExceptionHandler(BadRequestException.class)
@@ -35,4 +37,9 @@ public abstract class AbstractController {
         return new MessageDTO(e.getMessage());
     }
 
+    @ExceptionHandler(SQLException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public MessageDTO handleSQLException(SQLException e) {
+        return new MessageDTO("Unable to retrieve results from the database. " + e.getMessage());
+    }
 }
