@@ -78,7 +78,7 @@ public class PlaylistService {
         }
         Song song = this.songRepository.getSongById(addSongDTO.getSongID());
         if (song == null) {
-            throw new NotFoundException("The song you are trying to add not found!");
+            throw new NotFoundException("The song you are trying to add was not found!");
         }
         if (playlist.getSongs().contains(song)) {
             throw new BadRequestException("The song is already added to this playlist!");

@@ -1,6 +1,7 @@
 package com.soundcloud.controller;
 
 import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
+import com.soundcloud.model.DTOs.Comment.EditCommentRequestDTO;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
@@ -54,5 +55,11 @@ public class CommentController extends AbstractController {
     public MessageDTO setCommentLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int commentId) {
         User loggedUser = sessionManager.validateUser(session, "You must login to like/dislike a comment.");
         return commentService.setLike(commentId, likeValue, loggedUser);
+    }
+
+    @PutMapping("comments/{commentId}")
+    public CommentResponseDTO editComment(HttpSession session, @PathVariable int commentId, @RequestBody EditCommentRequestDTO requestDTO) {
+        User loggedUser = sessionManager.validateUser(session, "You must login to edit a comment.");
+        return commentService.editComment(loggedUser, commentId, requestDTO);
     }
 }

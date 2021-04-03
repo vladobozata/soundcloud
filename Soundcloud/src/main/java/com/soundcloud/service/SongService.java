@@ -3,6 +3,7 @@ package com.soundcloud.service;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.FileWriteException;
 import com.soundcloud.exceptions.NotFoundException;
+import com.soundcloud.model.DAOs.SongDAO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.Song.SongFilterRequestDTO;
 import com.soundcloud.model.DTOs.Song.SongFilterResponseDTO;
@@ -11,27 +12,36 @@ import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
 import com.soundcloud.model.repositories.UserRepository;
-import com.soundcloud.util.comparator.Order;
-import com.soundcloud.util.comparator.song.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.*;
-import java.util.Comparator;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
 public class SongService {
     private static final String FILE_SAVE_DIR = "Soundcloud/src/main/java/com/soundcloud/assets";
     private static final String FILE_SAVE_FORMAT = ".mp3";
+    private static final String SORT_BY_LIKES = "likes";
+    private static final String SORT_BY_DISLIKES = "dislikes";
+    private static final String SORT_BY_COMMENTS = "comments";
+    private static final String SORT_BY_VIEWS = "views";
+    private static final String SORT_BY_DATE = "date";
+    private static final String SORT_BY_PLAYLISTS = "playlists";
+    private static final int RESULTS_PER_PAGE = 3;
+
+    private final SongDAO songDAO;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
 
     @Autowired
-    public SongService(SongRepository songRepository, UserRepository userRepository) {
+    public SongService(SongDAO songDAO, SongRepository songRepository, UserRepository userRepository) {
+        this.songDAO = songDAO;
         this.songRepository = songRepository;
         this.userRepository = userRepository;
     }
@@ -105,7 +115,7 @@ public class SongService {
         return response;
     }
 
-    public List<SongFilterResponseDTO> getLikedByUsername(String username) {
+    public List<SongFilterResponseDTO> getLikedSongsByUsername(String username) {
         List<Song> songs = userRepository.findUserByUsername(username).getLikedSongs();
         return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
@@ -159,51 +169,35 @@ public class SongService {
         return new MessageDTO("You successfully " +action+ " song id#" + songId);
     }
 
-    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) {
-        if (searchRequest.getTitle() == null) throw new BadRequestException("Trying to search without title.");
+    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) throws SQLException {
+        String title = searchRequest.getTitle();
+        String sort = searchRequest.getSortBy().toLowerCase();
+        String order = searchRequest.getOrderBy().toUpperCase();
+        Integer page = searchRequest.getPage();
 
-        // Get list of songs from repo, filtered by given title
-        List<Song> filteredSongs = songRepository.findAllByTitleIgnoreCaseContaining(searchRequest.getTitle());
-
-        // If sort parameter is included, sort before returning filtered songs
-        if (searchRequest.getSort() != null) {
-            if (searchRequest.getOrder() == null) throw new BadRequestException("Trying to sort without order parameter.");
-            Order order = null;
-
-            try {
-                // Initialize order enum using order value from request
-                order = Order.valueOf(searchRequest.getOrder().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Search order can be ASC or DESC");
-            }
-
-            Comparator<Song> comparator;
-
-            // Initialize comparator using sort value from request
-            // Compare by view count, comments count, likes count, dislikes count, date uploaded
-            // based on input
-            switch (searchRequest.getSort().toLowerCase()) {
-                case "views":
-                    comparator = new CompareSongsByViews(order);
-                    break;
-                case "comments":
-                    comparator = new CompareSongsByComments(order);
-                    break;
-                case "likes":
-                    comparator = new CompareSongsByLikes(order);
-                    break;
-                case "dislikes":
-                    comparator = new CompareSongsByDislikes(order);
-                    break;
-                case "date":
-                    comparator = new CompareSongsByDate(order);
-                    break;
-                default:
-                    throw new BadRequestException("Search method not supported.");
-            }
-
-            filteredSongs.sort(comparator);
+        if (title == null) {
+            throw new BadRequestException("Trying to search without title.");
+        } else if (order == null) {
+            order = "ASC";
+        } else if (!order.equals("ASC") && !order.equals("DESC")){
+            System.out.println(order);
+            throw new BadRequestException("Search order not recognized");
         }
-        return filteredSongs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
+
+        if (sort == null) sort = "date";
+        if (page == null) page = 1;
+
+        switch (sort) {
+            case SORT_BY_PLAYLISTS:
+                sort = "inPlaylists";
+            case SORT_BY_LIKES:
+            case SORT_BY_DISLIKES:
+            case SORT_BY_VIEWS:
+            case SORT_BY_DATE:
+            case SORT_BY_COMMENTS:
+                return songDAO.filterSongs(title, sort, order, page, RESULTS_PER_PAGE);
+            default:
+                throw new BadRequestException("Search method not supported.");
+        }
     }
 }

@@ -11,6 +11,7 @@ import com.soundcloud.model.DTOs.Song.SongUploadResponseDTO;
 import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.service.SongService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +39,7 @@ public class SongController extends AbstractController {
     }
 
     @PostMapping("songs/filter")
+    @SneakyThrows
     public List<SongFilterResponseDTO> filterSongs(@RequestBody SongFilterRequestDTO searchRequest) {
         return songService.filterSongs(searchRequest);
     }
@@ -78,7 +80,7 @@ public class SongController extends AbstractController {
 
     @GetMapping("songs/by-user/{username}/liked")
     public List<SongFilterResponseDTO> getLikedSongs(@PathVariable String username) {
-        return songService.getLikedByUsername(username);
+        return songService.getLikedSongsByUsername(username);
     }
 
     // PUT //

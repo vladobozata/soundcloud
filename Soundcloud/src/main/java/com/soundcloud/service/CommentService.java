@@ -4,6 +4,7 @@ import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
+import com.soundcloud.model.DTOs.Comment.EditCommentRequestDTO;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
@@ -126,5 +127,21 @@ public class CommentService {
         userRepository.save(loggedUser);
         commentRepository.save(targetComment);
         return new MessageDTO("You successfully " +action+ " comment id#" + commentId);
+    }
+
+    public CommentResponseDTO editComment(User loggedUser, int commentId, EditCommentRequestDTO requestDTO) {
+        Comment comment = commentRepository.findCommentById(commentId);
+
+        if(comment == null) {
+            throw new NotFoundException("Comment id#" +commentId+ " was not found.");
+        }
+
+        if(loggedUser.getId() != comment.getOwner().getId()) {
+            throw new AuthenticationException("You cannot edit comments from other users.");
+        }
+
+        comment.setText(requestDTO.getText());
+        commentRepository.save(comment);
+        return new CommentResponseDTO(comment);
     }
 }

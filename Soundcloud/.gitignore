@@ -21,6 +21,8 @@ target/
 
 ### Sensitive Data ###
 src/main/resources/application-Alexander.properties
+/src/main/resources/application-Vladimir.properties
+/src/main/resources/application.properties
 
 ### NetBeans ###
 /nbproject/private/
