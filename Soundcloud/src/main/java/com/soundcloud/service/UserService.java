@@ -92,7 +92,7 @@ public class UserService {
                 throw new AuthenticationException("You must verify your email!");
             }
         }
-        throw new AuthenticationException("Wrong credentials!");
+        throw new BadRequestException("Wrong credentials!");
     }
 
     @Transactional
