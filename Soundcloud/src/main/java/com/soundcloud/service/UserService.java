@@ -133,10 +133,16 @@ public class UserService {
         return this.userRepository.save(loggedUser);
     }
 
-    public User userInformation(String username) {
-        User user = this.userRepository.findUserByUsername(username);
-        validateUser(user);
-        return user;
+    public List<FilterResponseUserDTO> userInformation(String username) {
+        List<User> users = this.userRepository.findUserByUsernameContains(username);
+        if(users == null){
+            throw new NotFoundException("No results!");
+        }
+        List<FilterResponseUserDTO> responseUsers = new ArrayList<>();
+        for(User user : users){
+            responseUsers.add(new FilterResponseUserDTO(user));
+        }
+        return responseUsers;
     }
 
     public User viewMyProfile(int userID) {

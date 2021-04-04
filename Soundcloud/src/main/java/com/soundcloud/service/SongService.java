@@ -19,6 +19,7 @@ import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
 import com.soundcloud.model.repositories.UserRepository;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -187,7 +188,8 @@ public class SongService {
         return new MessageDTO("You successfully " + action + " song id#" + songId);
     }
 
-    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) throws SQLException {
+    @SneakyThrows
+    public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) {
         String title = searchRequest.getTitle();
         Integer page = searchRequest.getPage();
 

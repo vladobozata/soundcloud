@@ -23,21 +23,21 @@ public class SongGetResponseDTO extends SongUploadResponseDTO {
 
     public SongGetResponseDTO(Song song) {
         super(song);
-        views = song.getViews();
-        comments = new ArrayList<>();
-        likers = new ArrayList<>();
-        dislikers = new ArrayList<>();
+        this.views = song.getViews();
+        this.comments = new ArrayList<>();
+        this.likers = new ArrayList<>();
+        this.dislikers = new ArrayList<>();
 
         for (Comment comment : song.getComments()) {
-            comments.add(new CommentResponseDTO(comment));
+            this.comments.add(new CommentResponseDTO(comment));
         }
 
         for (User liker : song.getLikers()) {
-            likers.add(new UserDTO(liker));
+            this.likers.add(new UserDTO(liker));
         }
 
         for (User disliker : song.getDislikers()) {
-            likers.add(new UserDTO(disliker));
+            this.likers.add(new UserDTO(disliker));
         }
     }
 }

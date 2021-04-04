@@ -17,9 +17,9 @@ public class SongUploadResponseDTO {
     private LocalDateTime createdAt;
 
     public SongUploadResponseDTO(Song song) {
-        id = song.getId();
-        title = song.getTitle();
-        url = song.getUrl();
-        createdAt = song.getCreatedAt();
+        this.id = song.getId();
+        this.title = song.getTitle();
+        this.url = song.getUrl();
+        this.createdAt = song.getCreatedAt();
     }
 }

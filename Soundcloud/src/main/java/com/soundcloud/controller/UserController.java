@@ -96,8 +96,8 @@ public class UserController extends AbstractController {
     }
 
     @GetMapping("/users/{username}")
-    public FilterResponseUserDTO userInformation(@PathVariable String username) {
-        return new FilterResponseUserDTO(this.userService.userInformation(username));
+    public List<FilterResponseUserDTO> userInformation(@PathVariable String username) {
+        return new ArrayList<>(this.userService.userInformation(username));
     }
 
     @GetMapping("/verify/{token}")
