@@ -80,6 +80,7 @@ public class CommentService {
         return new CommentResponseDTO(comment);
     }
 
+    @Transactional
     public MessageDTO setLike(int commentId, int likeValue, User loggedUser) {
         Comment targetComment = commentRepository.findCommentById(commentId);
         String action;
