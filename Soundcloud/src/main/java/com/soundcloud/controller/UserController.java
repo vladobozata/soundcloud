@@ -92,7 +92,7 @@ public class UserController extends AbstractController {
     @GetMapping("/users")
     public UserProfileResponseDTO viewProfile(HttpSession session) {
         User loggedUser = this.sessionManager.validateUser(session, "You have to login and then view your profile!");
-        return new UserProfileResponseDTO(this.userService.viewMyProfile(loggedUser));
+        return new UserProfileResponseDTO(this.userService.viewMyProfile(loggedUser.getId()));
     }
 
     @GetMapping("/users/{username}")

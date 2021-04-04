@@ -139,8 +139,8 @@ public class UserService {
         return user;
     }
 
-    public User viewMyProfile(User loggedUser) {
-        return this.userRepository.findUserByUsername(loggedUser.getUsername());
+    public User viewMyProfile(int userID) {
+        return this.userRepository.findUserById(userID);
     }
 
     @Transactional

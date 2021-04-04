@@ -1,6 +1,5 @@
 package com.soundcloud.controller;
 
-import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.UserRepository;
