@@ -15,7 +15,7 @@ import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.POJOs.VerificationToken;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
-import com.soundcloud.util.comparator.Order;
+import com.soundcloud.util.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
