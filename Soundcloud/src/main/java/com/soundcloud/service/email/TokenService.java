@@ -1,6 +1,7 @@
 package com.soundcloud.service.email;
 
 import com.soundcloud.exceptions.BadRequestException;
+import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.POJOs.VerificationToken;
 import com.soundcloud.model.repositories.VerificationTokenRepository;
@@ -30,6 +31,9 @@ public class TokenService {
         }
         if(user != null){
             throw new BadRequestException("You do not have a permission to validate foreign email!");
+        }
+        if(token.getExpiresAt().compareTo(LocalDateTime.now()) < 0){
+            throw new NotFoundException("Verification token expired...");
         }
         token.getUser().setEnabled(true);
         token.setConfirmedAt(LocalDateTime.now());

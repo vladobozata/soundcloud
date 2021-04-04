@@ -17,8 +17,6 @@ public class EmailService {
         message.setTo(mail);
         message.setSubject("Please verify your registration:<br>");
         String verifyURL = "localhost:7878/verify/" + token;
-//        String content = "<br>Please click the link below to verify your registration:<br>"
-//                +"<a href=\"" + verifyURL +"\">Click here</a> Thanks!";
         String content = "Please follow http://" + verifyURL + " this link";
         message.setText(content);
         this.mailSender.send(message);
