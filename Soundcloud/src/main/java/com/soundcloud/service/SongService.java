@@ -59,8 +59,9 @@ public class SongService {
 
     public Song uploadSong(String title, MultipartFile receivedFile, User loggedUser) {
         String originalName = receivedFile.getOriginalFilename();
+        if (originalName == null) throw new BadRequestException("File name is empty.");
         if (!originalName.contains(".")) throw new BadRequestException("Uploaded file does not have an extension.");
-        if (title == null || songRepository.getSongByTitle(title) != null) throw new BadRequestException("A track with this title already exists!");
+        if (title == null || songRepository.getSongByTitle(title) != null) throw new BadRequestException("A track with this title already exists.");
 
         String extension = originalName.substring(originalName.indexOf('.'));
         if (!extension.equals(".mp3")) throw new BadRequestException("Unrecognized file extension. Please select an mp3 file.");
