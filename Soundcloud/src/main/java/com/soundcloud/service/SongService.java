@@ -29,6 +29,7 @@ import javax.transaction.Transactional;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,8 +59,9 @@ public class SongService {
 
     public Song uploadSong(String title, MultipartFile receivedFile, User loggedUser) {
         String originalName = receivedFile.getOriginalFilename();
+        if (originalName == null) throw new BadRequestException("File name is empty.");
         if (!originalName.contains(".")) throw new BadRequestException("Uploaded file does not have an extension.");
-        if (title == null || songRepository.getSongByTitle(title) != null) throw new BadRequestException("A track with this title already exists!");
+        if (title == null || songRepository.getSongByTitle(title) != null) throw new BadRequestException("A track with this title already exists.");
 
         String extension = originalName.substring(originalName.indexOf('.'));
         if (!extension.equals(".mp3")) throw new BadRequestException("Unrecognized file extension. Please select an mp3 file.");
@@ -191,20 +193,26 @@ public class SongService {
 
     public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) throws SQLException {
         String title = searchRequest.getTitle();
-        String sort = searchRequest.getSortBy().toLowerCase();
-        String order = searchRequest.getOrderBy().toUpperCase();
         Integer page = searchRequest.getPage();
+
+        String sort = searchRequest.getSortBy();
+        if(sort == null) sort = "";
+        else sort = sort.toLowerCase().trim();
+
+        String order = searchRequest.getOrderBy();
+        if (order == null) order = "";
+        else order = order.toUpperCase().trim();
+
 
         if (title == null) {
             throw new BadRequestException("Trying to search without title.");
-        } else if (order == null) {
+        } else if (order.equals("")) {
             order = "ASC";
         } else if (!order.equals("ASC") && !order.equals("DESC")){
-            System.out.println(order);
             throw new BadRequestException("Search order not recognized");
         }
 
-        if (sort == null) sort = "date";
+        if (sort.trim().equals("")) sort = "date";
         if (page == null) page = 1;
 
         switch (sort) {
