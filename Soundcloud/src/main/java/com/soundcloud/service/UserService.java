@@ -1,6 +1,5 @@
 package com.soundcloud.service;
 
-import java.sql.SQLException;
 import java.util.*;
 
 import com.soundcloud.model.repositories.VerificationTokenRepository;
@@ -16,6 +15,7 @@ import com.soundcloud.model.POJOs.VerificationToken;
 import com.soundcloud.model.repositories.UserRepository;
 import com.soundcloud.util.Validator;
 import com.soundcloud.util.Order;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,7 +86,7 @@ public class UserService {
         if (user != null) {
             PasswordEncoder encoder = new BCryptPasswordEncoder();
             if (encoder.matches(loginDTO.getPassword(), user.getPassword())) {
-                if(user.isEnabled()){
+                if (user.isEnabled()) {
                     return user;
                 }
                 throw new AuthenticationException("You must verify your email!");
@@ -148,16 +148,17 @@ public class UserService {
         this.userRepository.deleteUserById(userID);
     }
 
+    @SneakyThrows
     public List<FilterResponseUserWithoutPlaylistDTO> filterUsers(FilterRequestUserDTO filterUserDTO) {
-        if(!filterUserDTO.getOrderBy().equalsIgnoreCase(Order.ASC.toString())){
-            if(!filterUserDTO.getOrderBy().equalsIgnoreCase(Order.DESC.toString())){
+        if (!filterUserDTO.getOrderBy().equalsIgnoreCase(Order.ASC.toString())) {
+            if (!filterUserDTO.getOrderBy().equalsIgnoreCase(Order.DESC.toString())) {
                 throw new BadRequestException("Invalid order type!");
             }
         }
-        if(filterUserDTO.getPage() <= 0){
+        if (filterUserDTO.getPage() <= 0) {
             throw new BadRequestException("Page number must be at least 1!");
         }
-        if(filterUserDTO.getItemsPerPage() <= 0){
+        if (filterUserDTO.getItemsPerPage() <= 0) {
             throw new BadRequestException("Items per page must be at least 1!");
         }
         switch (filterUserDTO.getSortBy()) {
@@ -165,11 +166,7 @@ public class UserService {
             case FILTER_BY_FOLLOWERS:
             case FILTER_BY_PLAYLISTS:
             case FILTER_BY_SONGS:
-                try {
-                   return this.userDAO.getFilteredUsers(filterUserDTO);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                return this.userDAO.getFilteredUsers(filterUserDTO);
             default:
                 throw new BadRequestException("Sort type not recognized!");
         }

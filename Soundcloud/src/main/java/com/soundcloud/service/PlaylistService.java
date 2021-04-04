@@ -28,7 +28,7 @@ public class PlaylistService {
         this.songRepository = songRepository;
     }
 
-    public void validatePlaylist(Playlist playlist){
+    public void validatePlaylist(Playlist playlist) {
         if (playlist == null) {
             throw new NotFoundException("Playlist not found!");
         }

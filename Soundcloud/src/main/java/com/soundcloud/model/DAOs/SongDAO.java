@@ -1,12 +1,12 @@
 package com.soundcloud.model.DAOs;
 
 import com.soundcloud.model.DTOs.Song.SongFilterResponseDTO;
-import jdk.jfr.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,22 +52,27 @@ public class SongDAO {
                      "LIMIT %d OFFSET %d";
 
         sql = String.format(sql, queryTitle, sort, order, resultsPerPage, (resultsPerPage * (page - 1)));
-        PreparedStatement statement = jdbcTemplate.getDataSource().getConnection().prepareStatement(sql);
-        ResultSet results = statement.executeQuery();
-
-        while(results.next()) {
-            String title = results.getString("title");
-            String uploadedBy = results.getString("uploadedBy");
-            LocalDateTime uploadDate = results.getTimestamp("date").toLocalDateTime();
-            int songId = results.getInt("songId");
-            int views = results.getInt("views");
-            int comments = results.getInt("comments");
-            int likes = results.getInt("likes");
-            int dislikes = results.getInt("dislikes");
-            int inPlaylists = results.getInt("inPlaylists");
-            songs.add(new SongFilterResponseDTO(title, uploadedBy, uploadDate, songId, views, comments, likes, dislikes, inPlaylists));
+        DataSource dataSource = this.jdbcTemplate.getDataSource();
+        if (dataSource != null) {
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(sql))
+            {
+                ResultSet results = statement.executeQuery();
+                while (results.next()) {
+                    String title = results.getString("title");
+                    String uploadedBy = results.getString("uploadedBy");
+                    LocalDateTime uploadDate = results.getTimestamp("date").toLocalDateTime();
+                    int songId = results.getInt("songId");
+                    int views = results.getInt("views");
+                    int comments = results.getInt("comments");
+                    int likes = results.getInt("likes");
+                    int dislikes = results.getInt("dislikes");
+                    int inPlaylists = results.getInt("inPlaylists");
+                    songs.add(new SongFilterResponseDTO(title, uploadedBy, uploadDate, songId, views, comments, likes, dislikes, inPlaylists));
+                }
+            }
+            return songs;
         }
-
-        return songs;
+        throw new SQLException("Connection to DB failed!");
     }
 }

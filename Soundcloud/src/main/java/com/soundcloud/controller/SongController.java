@@ -33,31 +33,31 @@ public class SongController extends AbstractController {
     // POST //
     @PostMapping("/songs")
     public SongUploadResponseDTO upload (@RequestPart MultipartFile file, @RequestPart String name, HttpSession session) {
-        User loggedUser = sessionManager.validateUser(session, "You must login to upload a song.");
-        Song uploadedSong = songService.uploadSong(name, file, loggedUser);
+        User loggedUser = this.sessionManager.validateUser(session, "You must login to upload a song.");
+        Song uploadedSong = this.songService.uploadSong(name, file, loggedUser);
         return new SongUploadResponseDTO(uploadedSong);
     }
 
     @PostMapping("songs/filter")
     @SneakyThrows
     public List<SongFilterResponseDTO> filterSongs(@RequestBody SongFilterRequestDTO searchRequest) {
-        return songService.filterSongs(searchRequest);
+        return this.songService.filterSongs(searchRequest);
     }
 
     // DELETE //
     @DeleteMapping("/songs")
     public MessageDTO delete(@RequestBody ResourceRequestDTO requestJson, HttpSession session) {
-        User loggedUser = sessionManager.getLoggedUser(session);
+        User loggedUser = this.sessionManager.getLoggedUser(session);
         Integer songId = requestJson.getResourceId();
 
         if(loggedUser == null) {
             throw new AuthenticationException("You must login to delete a song.");
         } else if(songId == null) {
             throw new BadRequestException("You must choose a song to delete.");
-        } else if(songService.getOwnerForSongId(songId).getId() != loggedUser.getId() ) {
+        } else if(this.songService.getOwnerForSongId(songId).getId() != loggedUser.getId() ) {
             throw new AuthenticationException("You cannot delete songs uploaded by other users.");
         } else{
-            songService.deleteSong(songId);
+            this.songService.deleteSong(songId);
             return new MessageDTO("You have successfully deleted song id#" + songId);
         }
     }
@@ -65,29 +65,28 @@ public class SongController extends AbstractController {
     // GET //
     @GetMapping("/songs/{id}/info")
     public SongGetResponseDTO getById (@PathVariable int id) {
-        return new SongGetResponseDTO(songService.getById(id));
+        return new SongGetResponseDTO(this.songService.getById(id));
     }
 
     @GetMapping(value = "/songs/{id}", produces = "audio/mpeg")
     public byte[] playSong (@PathVariable int id) {
-        return songService.playSong(id);
+        return this.songService.playSong(id);
     }
 
     @GetMapping("songs/by-user/{username}")
     public List<SongFilterResponseDTO> getByUsername(@PathVariable String username) {
-        return songService.getByUsername(username);
+        return this.songService.getByUsername(username);
     }
 
     @GetMapping("songs/by-user/{username}/liked")
     public List<SongFilterResponseDTO> getLikedSongs(@PathVariable String username) {
-        return songService.getLikedSongsByUsername(username);
+        return this.songService.getLikedSongsByUsername(username);
     }
 
     // PUT //
     @PutMapping("/songs/{songId}/set-like-status")
     public MessageDTO setSongLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int songId) {
-        User loggedUser = sessionManager.validateUser(session, "You must login to like/dislike a song.");
-        return songService.setLike(songId, likeValue, loggedUser);
+        User loggedUser = this.sessionManager.validateUser(session, "You must login to like/dislike a song.");
+        return this.songService.setLike(songId, likeValue, loggedUser);
     }
-
 }

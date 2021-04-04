@@ -41,7 +41,7 @@ public class Song {
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
     @JsonManagedReference
-    List<User> likers;
+    private List<User> likers;
 
     @ManyToMany
     @JoinTable(
@@ -50,7 +50,7 @@ public class Song {
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
     @JsonManagedReference
-    List<User> dislikers;
+    private List<User> dislikers;
 
     public Song(String title, String url, User owner) {
         this.title = title;

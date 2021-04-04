@@ -36,7 +36,7 @@ public class CommentService {
 
     @Transactional
     public MessageDTO postComment(PostCommentRequestDTO requestDTO, User loggedUser) {
-        Song songCommented = songRepository.getSongById(requestDTO.getSongId());
+        Song songCommented = this.songRepository.getSongById(requestDTO.getSongId());
         if (songCommented == null) throw new NotFoundException("Cannot find song id#" + requestDTO.getSongId());
 
         Comment comment = new Comment(requestDTO.getText());
@@ -49,34 +49,35 @@ public class CommentService {
         comment.setOwner(loggedUser);
         comment.setSong(songCommented);
 
-        userRepository.save(loggedUser);
-        songRepository.save(songCommented);
-        commentRepository.save(comment);
+        this.userRepository.save(loggedUser);
+        this.songRepository.save(songCommented);
+        this.commentRepository.save(comment);
         return new MessageDTO("Comment posted. Comment id: #" + comment.getId());
     }
 
     public MessageDTO deleteComment(ResourceRequestDTO requestDTO, User loggedUser) {
         Integer id = requestDTO.getResourceId();
         if (id == null) throw new BadRequestException("Must select comment to delete by id.");
-        Comment comment = commentRepository.findCommentById(id);
-        if (comment == null) throw new NotFoundException("Comment id#" +id+ " was not found.");
+        Comment comment = this.commentRepository.findCommentById(id);
+
+        if (comment == null) throw new NotFoundException("Comment id#" + id + " was not found.");
         if (comment.getOwner().getId() != loggedUser.getId()) throw new AuthenticationException("Cannot delete comments from other users.");
 
-        commentRepository.delete(comment);
-        return new MessageDTO("Comment id#" +id+ " successfully deleted.");
+        this.commentRepository.delete(comment);
+        return new MessageDTO("Comment id#" + id + " successfully deleted.");
     }
 
     public List<CommentResponseDTO> getCommentBySong(int songId) {
-        Song song = songRepository.getSongById(songId);
-        if(song == null) throw new NotFoundException("Song id#" +songId+ " was not found.");
-        List<Comment> songComments = commentRepository.findCommentsBySong(song);
+        Song song = this.songRepository.getSongById(songId);
+        if (song == null) throw new NotFoundException("Song id#" + songId + " was not found.");
+        List<Comment> songComments = this.commentRepository.findCommentsBySong(song);
 
         return songComments.stream().map(CommentResponseDTO::new).collect(Collectors.toList());
     }
 
     public CommentResponseDTO getCommentById(int commentId) {
-        Comment comment = commentRepository.findCommentById(commentId);
-        if (comment == null) throw new NotFoundException("Comment id#" +commentId+ " was not found.");
+        Comment comment = this.commentRepository.findCommentById(commentId);
+        if (comment == null) throw new NotFoundException("Comment id#" + commentId + " was not found.");
         return new CommentResponseDTO(comment);
     }
 
@@ -124,25 +125,19 @@ public class CommentService {
             default:
                 throw new BadRequestException("Invalid like status passed.");
         }
-
-        userRepository.save(loggedUser);
-        commentRepository.save(targetComment);
-        return new MessageDTO("You successfully " +action+ " comment id#" + commentId);
+        this.userRepository.save(loggedUser);
+        this.commentRepository.save(targetComment);
+        return new MessageDTO("You successfully " + action + " comment id#" + commentId);
     }
 
     public CommentResponseDTO editComment(User loggedUser, int commentId, EditCommentRequestDTO requestDTO) {
-        Comment comment = commentRepository.findCommentById(commentId);
+        Comment comment = this.commentRepository.findCommentById(commentId);
 
-        if(comment == null) {
-            throw new NotFoundException("Comment id#" +commentId+ " was not found.");
-        }
-
-        if(loggedUser.getId() != comment.getOwner().getId()) {
-            throw new AuthenticationException("You cannot edit comments from other users.");
-        }
+        if (comment == null) throw new NotFoundException("Comment id#" + commentId + " was not found.");
+        if (loggedUser.getId() != comment.getOwner().getId()) throw new AuthenticationException("You cannot edit comments from other users.");
 
         comment.setText(requestDTO.getText());
-        commentRepository.save(comment);
+        this.commentRepository.save(comment);
         return new CommentResponseDTO(comment);
     }
 }

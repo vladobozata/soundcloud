@@ -1,6 +1,5 @@
 package com.soundcloud.service;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -20,7 +19,6 @@ import com.soundcloud.model.POJOs.Song;
 import com.soundcloud.model.POJOs.User;
 import com.soundcloud.model.repositories.SongRepository;
 import com.soundcloud.model.repositories.UserRepository;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +27,6 @@ import javax.transaction.Transactional;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +39,6 @@ public class SongService {
     private static final String SORT_BY_DATE = "date";
     private static final String SORT_BY_PLAYLISTS = "playlists";
     private static final int RESULTS_PER_PAGE = 3;
-
 
     private final SongDAO songDAO;
     private final SongRepository songRepository;
@@ -61,7 +57,8 @@ public class SongService {
         String originalName = receivedFile.getOriginalFilename();
         if (originalName == null) throw new BadRequestException("File name is empty.");
         if (!originalName.contains(".")) throw new BadRequestException("Uploaded file does not have an extension.");
-        if (title == null || songRepository.getSongByTitle(title) != null) throw new BadRequestException("A track with this title already exists.");
+        if (title == null || this.songRepository.getSongByTitle(title) != null)
+            throw new BadRequestException("A track with this title already exists.");
 
         String extension = originalName.substring(originalName.indexOf('.'));
         if (!extension.equals(".mp3")) throw new BadRequestException("Unrecognized file extension. Please select an mp3 file.");
@@ -70,23 +67,22 @@ public class SongService {
         String fullName = fileName + extension;
 
         Song song = new Song(title, fullName, loggedUser);
-        songRepository.save(song);
+        this.songRepository.save(song);
 
         ObjectMetadata meta = new ObjectMetadata();
         meta.setContentType("audio/mpeg");
         meta.setContentLength(receivedFile.getSize());
         try {
-            storageClient.putObject(STORAGE_BUCKET_NAME, fullName, receivedFile.getInputStream(), meta);
+            this.storageClient.putObject(STORAGE_BUCKET_NAME, fullName, receivedFile.getInputStream(), meta);
         } catch (AmazonServiceException | IOException e) {
             throw new FileReadWriteException("Could not save song to server - " + e.getMessage());
         }
-
         return song;
     }
 
     public Song getById(int id) {
-        Song s = songRepository.getSongById(id);
-        if (s == null)  {
+        Song s = this.songRepository.getSongById(id);
+        if (s == null) {
             throw new NotFoundException("Song with id " + id + " not found.");
         } else {
             return s;
@@ -98,14 +94,14 @@ public class SongService {
         if (s == null) throw new NotFoundException("The song you are trying to play was not found.");
 
         try {
-            S3Object downloadedFile = storageClient.getObject(STORAGE_BUCKET_NAME, s.getUrl());
+            S3Object downloadedFile = this.storageClient.getObject(STORAGE_BUCKET_NAME, s.getUrl());
             S3ObjectInputStream stream = downloadedFile.getObjectContent();
 
-            s.setViews(s.getViews()+1);
-            songRepository.save(s);
+            s.setViews(s.getViews() + 1);
+            this.songRepository.save(s);
 
             return IOUtils.toByteArray(stream);
-        }catch (AmazonServiceException | IOException e) {
+        } catch (AmazonServiceException | IOException e) {
             throw new FileReadWriteException("Could not download the song from the server. Details: " + e.getMessage());
         }
     }
@@ -118,36 +114,36 @@ public class SongService {
     public void deleteSong(int songId) {
         SongGetResponseDTO dto = new SongGetResponseDTO(getById(songId));
         try {
-            storageClient.deleteObject(STORAGE_BUCKET_NAME, dto.getUrl());
+            this.storageClient.deleteObject(STORAGE_BUCKET_NAME, dto.getUrl());
         } catch (SdkClientException e) {
             throw new FileReadWriteException("Failed to delete song file from the server. Details: " + e.getMessage());
         }
-        songRepository.deleteById(songId);
+        this.songRepository.deleteById(songId);
     }
 
     public List<SongFilterResponseDTO> getByUsername(String username) {
-        User owner = userRepository.findUserByUsername(username);
-        if(owner == null) throw new NotFoundException("Could not find user " + username);
+        User owner = this.userRepository.findUserByUsername(username);
+        if (owner == null) throw new NotFoundException("Could not find user " + username);
 
-        List<Song> songs = songRepository.getAllByOwner(owner);
+        List<Song> songs = this.songRepository.getAllByOwner(owner);
 
-        if(songs == null || songs.isEmpty()) throw new BadRequestException("This user doesn't have any songs.");
+        if (songs == null || songs.isEmpty()) throw new BadRequestException("This user doesn't have any songs.");
 
         List<SongFilterResponseDTO> response = songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
         return response;
     }
 
     public List<SongFilterResponseDTO> getLikedSongsByUsername(String username) {
-        List<Song> songs = userRepository.findUserByUsername(username).getLikedSongs();
+        List<Song> songs = this.userRepository.findUserByUsername(username).getLikedSongs();
         return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 
     @Transactional
     public MessageDTO setLike(int songId, int likeValue, User loggedUser) {
-        Song targetSong = songRepository.getSongById(songId);
-        String action = new String("");
+        Song targetSong = this.songRepository.getSongById(songId);
+        String action;
 
-        if(targetSong == null) {
+        if (targetSong == null) {
             throw new NotFoundException("The song you are trying to like or dislike was not found.");
         }
 
@@ -160,7 +156,7 @@ public class SongService {
                 action = "liked";
                 break;
             case 0:
-                if(loggedUser.getLikedSongs().contains(targetSong)) {
+                if (loggedUser.getLikedSongs().contains(targetSong)) {
                     // If song was previously liked
                     loggedUser.getLikedSongs().remove(targetSong);
                     targetSong.getLikers().remove(loggedUser);
@@ -186,9 +182,9 @@ public class SongService {
                 throw new BadRequestException("Invalid like status passed.");
         }
 
-        userRepository.save(loggedUser);
-        songRepository.save(targetSong);
-        return new MessageDTO("You successfully " +action+ " song id#" + songId);
+        this.userRepository.save(loggedUser);
+        this.songRepository.save(targetSong);
+        return new MessageDTO("You successfully " + action + " song id#" + songId);
     }
 
     public List<SongFilterResponseDTO> filterSongs(SongFilterRequestDTO searchRequest) throws SQLException {
@@ -196,19 +192,18 @@ public class SongService {
         Integer page = searchRequest.getPage();
 
         String sort = searchRequest.getSortBy();
-        if(sort == null) sort = "";
+        if (sort == null) sort = "";
         else sort = sort.toLowerCase().trim();
 
         String order = searchRequest.getOrderBy();
         if (order == null) order = "";
         else order = order.toUpperCase().trim();
 
-
         if (title == null) {
             throw new BadRequestException("Trying to search without title.");
         } else if (order.equals("")) {
             order = "ASC";
-        } else if (!order.equals("ASC") && !order.equals("DESC")){
+        } else if (!order.equals("ASC") && !order.equals("DESC")) {
             throw new BadRequestException("Search order not recognized");
         }
 
@@ -223,7 +218,7 @@ public class SongService {
             case SORT_BY_VIEWS:
             case SORT_BY_DATE:
             case SORT_BY_COMMENTS:
-                return songDAO.filterSongs(title, sort, order, page, RESULTS_PER_PAGE);
+                return this.songDAO.filterSongs(title, sort, order, page, RESULTS_PER_PAGE);
             default:
                 throw new BadRequestException("Search method not supported.");
         }
