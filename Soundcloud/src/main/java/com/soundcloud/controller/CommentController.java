@@ -3,6 +3,7 @@ package com.soundcloud.controller;
 import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
 import com.soundcloud.model.DTOs.Comment.EditCommentRequestDTO;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
+import com.soundcloud.model.DTOs.LikeDislikeResponseDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
 import com.soundcloud.model.POJOs.User;
@@ -52,7 +53,7 @@ public class CommentController extends AbstractController {
 
     // PUT
     @PutMapping("comments/{commentId}/set-like-status")
-    public MessageDTO setCommentLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int commentId) {
+    public LikeDislikeResponseDTO setCommentLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int commentId) {
         User loggedUser = sessionManager.validateUser(session, "You must login to like/dislike a comment.");
         return commentService.setLike(commentId, likeValue, loggedUser);
     }

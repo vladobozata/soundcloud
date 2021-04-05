@@ -11,6 +11,7 @@ import com.soundcloud.exceptions.BadRequestException;
 import com.soundcloud.exceptions.FileReadWriteException;
 import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DAOs.SongDAO;
+import com.soundcloud.model.DTOs.LikeDislikeResponseDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.Song.SongFilterRequestDTO;
 import com.soundcloud.model.DTOs.Song.SongFilterResponseDTO;
@@ -26,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.*;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +39,8 @@ public class SongService {
     private static final String SORT_BY_VIEWS = "views";
     private static final String SORT_BY_DATE = "date";
     private static final String SORT_BY_PLAYLISTS = "playlists";
-    private static final int RESULTS_PER_PAGE = 3;
+    private static final int FILTER_RESULTS_PER_PAGE = 5;
+    private static final long MAXIMUM_FILESIZE_BYTES = 10*1024*1024; // 10 mb
 
     private final SongDAO songDAO;
     private final SongRepository songRepository;
@@ -56,34 +57,41 @@ public class SongService {
 
     public Song uploadSong(String title, MultipartFile receivedFile, User loggedUser) {
         String originalName = receivedFile.getOriginalFilename();
-        if (originalName == null) {
+        String extension, fileName, fullName;
+
+        if (receivedFile.getSize() > MAXIMUM_FILESIZE_BYTES) {
+            throw new BadRequestException("File size too large.");
+        }
+        if (originalName == null || originalName.isBlank()) {
             throw new BadRequestException("File name is empty.");
         }
         if (!originalName.contains(".")) {
             throw new BadRequestException("Uploaded file does not have an extension.");
+        } else {
+            extension = originalName.substring(originalName.indexOf('.'));
         }
         if (title == null || this.songRepository.getSongByTitle(title) != null) {
             throw new BadRequestException("A track with this title already exists.");
         }
-
-        String extension = originalName.substring(originalName.indexOf('.'));
         if (!extension.equals(".mp3")) {
             throw new BadRequestException("Unrecognized file extension. Please select an mp3 file.");
         }
-        String fileName = String.valueOf(System.nanoTime());
-        String fullName = fileName + extension;
 
-        Song song = new Song(title, fullName, loggedUser);
-        this.songRepository.save(song);
+        fileName = String.valueOf(System.nanoTime());
+        fullName = fileName + extension;
 
+        Song song;
         ObjectMetadata meta = new ObjectMetadata();
         meta.setContentType("audio/mpeg");
         meta.setContentLength(receivedFile.getSize());
         try {
             this.storageClient.putObject(STORAGE_BUCKET_NAME, fullName, receivedFile.getInputStream(), meta);
+            song = new Song(title, fullName, loggedUser);
+            this.songRepository.save(song);
         } catch (AmazonServiceException | IOException e) {
             throw new FileReadWriteException("Could not save song to server - " + e.getMessage());
         }
+
         return song;
     }
 
@@ -149,7 +157,7 @@ public class SongService {
     }
 
     @Transactional
-    public MessageDTO setLike(int songId, int likeValue, User loggedUser) {
+    public LikeDislikeResponseDTO setLike(int songId, int likeValue, User loggedUser) {
         Song targetSong = this.songRepository.getSongById(songId);
         String action;
 
@@ -159,7 +167,7 @@ public class SongService {
 
         switch (likeValue) {
             case 1:
-                if (loggedUser.getLikedSongs().contains(targetSong)) return new MessageDTO("Song left liked.");
+                if (loggedUser.getLikedSongs().contains(targetSong)) return new LikeDislikeResponseDTO("Song left liked.", targetSong.getLikers().size());
                 if (loggedUser.getDislikedSongs().contains(targetSong)) setLike(songId, 0, loggedUser);
                 loggedUser.getLikedSongs().add(targetSong);
                 targetSong.getLikers().add(loggedUser);
@@ -178,11 +186,11 @@ public class SongService {
                     action = "undisliked";
                 } else {
                     // If song was previously neutral
-                    return new MessageDTO("Song status left at neutral.");
+                    return new LikeDislikeResponseDTO("Song status left at neutral.", targetSong.getLikers().size());
                 }
                 break;
             case -1:
-                if (loggedUser.getDislikedSongs().contains(targetSong)) return new MessageDTO("Song left disliked.");
+                if (loggedUser.getDislikedSongs().contains(targetSong)) return new LikeDislikeResponseDTO("Song left disliked.", targetSong.getLikers().size());
                 if (loggedUser.getLikedSongs().contains(targetSong)) setLike(songId, 0, loggedUser);
                 loggedUser.getDislikedSongs().add(targetSong);
                 targetSong.getDislikers().add(loggedUser);
@@ -194,7 +202,7 @@ public class SongService {
 
         this.userRepository.save(loggedUser);
         this.songRepository.save(targetSong);
-        return new MessageDTO("You successfully " + action + " song id#" + songId);
+        return new LikeDislikeResponseDTO("You successfully " + action + " song id#" + songId, targetSong.getLikers().size());
     }
 
     @SneakyThrows
@@ -229,7 +237,7 @@ public class SongService {
             case SORT_BY_VIEWS:
             case SORT_BY_DATE:
             case SORT_BY_COMMENTS:
-                return this.songDAO.filterSongs(title, sort, order, page, RESULTS_PER_PAGE);
+                return this.songDAO.filterSongs(title, sort, order, page, FILTER_RESULTS_PER_PAGE);
             default:
                 throw new BadRequestException("Search method not supported.");
         }

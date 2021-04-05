@@ -6,6 +6,7 @@ import com.soundcloud.exceptions.NotFoundException;
 import com.soundcloud.model.DTOs.Comment.CommentResponseDTO;
 import com.soundcloud.model.DTOs.Comment.EditCommentRequestDTO;
 import com.soundcloud.model.DTOs.Comment.PostCommentRequestDTO;
+import com.soundcloud.model.DTOs.LikeDislikeResponseDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
 import com.soundcloud.model.POJOs.Comment;
@@ -82,7 +83,7 @@ public class CommentService {
     }
 
     @Transactional
-    public MessageDTO setLike(int commentId, int likeValue, User loggedUser) {
+    public LikeDislikeResponseDTO setLike(int commentId, int likeValue, User loggedUser) {
         Comment targetComment = commentRepository.findCommentById(commentId);
         String action;
 
@@ -92,7 +93,7 @@ public class CommentService {
 
         switch (likeValue) {
             case 1:
-                if (loggedUser.getLikedComments().contains(targetComment)) return new MessageDTO("Comment left liked.");
+                if (loggedUser.getLikedComments().contains(targetComment)) return new LikeDislikeResponseDTO("Comment left liked.", targetComment.getLikers().size());
                 if (loggedUser.getDislikedComments().contains(targetComment)) setLike(commentId, 0, loggedUser);
                 loggedUser.getLikedComments().add(targetComment);
                 targetComment.getLikers().add(loggedUser);
@@ -111,12 +112,12 @@ public class CommentService {
                     action = "undisliked";
                 } else {
                     // If comment was previously neutral
-                    return new MessageDTO("Comment status left at neutral.");
+                    return new LikeDislikeResponseDTO("Comment status left at neutral.", targetComment.getLikers().size());
                 }
                 break;
             case -1:
                 if (loggedUser.getDislikedComments().contains(targetComment))
-                    return new MessageDTO("Comment left disliked.");
+                    return new LikeDislikeResponseDTO("Comment left disliked.", targetComment.getLikers().size());
                 if (loggedUser.getLikedComments().contains(targetComment)) setLike(commentId, 0, loggedUser);
                 loggedUser.getDislikedComments().add(targetComment);
                 targetComment.getDislikers().add(loggedUser);
@@ -127,7 +128,7 @@ public class CommentService {
         }
         this.userRepository.save(loggedUser);
         this.commentRepository.save(targetComment);
-        return new MessageDTO("You successfully " + action + " comment id#" + commentId);
+        return new LikeDislikeResponseDTO("You successfully " + action + " comment id#" + commentId, targetComment.getLikers().size());
     }
 
     public CommentResponseDTO editComment(User loggedUser, int commentId, EditCommentRequestDTO requestDTO) {

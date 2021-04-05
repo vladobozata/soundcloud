@@ -2,6 +2,7 @@ package com.soundcloud.controller;
 
 import com.soundcloud.exceptions.AuthenticationException;
 import com.soundcloud.exceptions.BadRequestException;
+import com.soundcloud.model.DTOs.LikeDislikeResponseDTO;
 import com.soundcloud.model.DTOs.MessageDTO;
 import com.soundcloud.model.DTOs.ResourceRequestDTO;
 import com.soundcloud.model.DTOs.Song.SongFilterRequestDTO;
@@ -83,7 +84,7 @@ public class SongController extends AbstractController {
 
     // PUT //
     @PutMapping("/songs/{songId}/set-like-status")
-    public MessageDTO setSongLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int songId) {
+    public LikeDislikeResponseDTO setSongLikeStatus(HttpSession session, @RequestParam(name = "value") int likeValue, @PathVariable int songId) {
         User loggedUser = this.sessionManager.validateUser(session, "You must login to like/dislike a song.");
         return this.songService.setLike(songId, likeValue, loggedUser);
     }
