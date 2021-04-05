@@ -164,7 +164,7 @@ public class UserService {
         if (filterUserDTO.getPage() <= 0) {
             throw new BadRequestException("Page number must be at least 1!");
         }
-        if (filterUserDTO.getItemsPerPage() <= 0) {
+        if (filterUserDTO.getUsersPerPage() <= 0) {
             throw new BadRequestException("Items per page must be at least 1!");
         }
         switch (filterUserDTO.getSortBy()) {
