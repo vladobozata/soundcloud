@@ -39,8 +39,8 @@ public class UserDAO {
 
                              "GROUP BY u.id " +
                              "ORDER BY " + filterUserDTO.getSortBy() + " " + filterUserDTO.getOrderBy() + " " +
-                             "LIMIT " + filterUserDTO.getItemsPerPage() + " " +
-                             "OFFSET " + (filterUserDTO.getItemsPerPage() * (filterUserDTO.getPage() - 1)); // starts from 0
+                             "LIMIT " + filterUserDTO.getUsersPerPage() + " " +
+                             "OFFSET " + (filterUserDTO.getUsersPerPage() * (filterUserDTO.getPage() - 1)); // starts from 0
         // take 4 rows per query depends on page given by user
         // e.g. page 4 -> LIMIT 4 OFFSET 4 * (4-1) -> rows 12, 13, 14, 15
         // page 1 - 0,1,2,3; page 2 - 4,5,6,7; page 3 - 8,9,10,11; ....
