@@ -144,15 +144,17 @@ public class SongService {
 
         List<Song> songs = this.songRepository.getAllByOwner(owner);
 
-        if (songs == null || songs.isEmpty()) {
-            throw new BadRequestException("This user doesn't have any songs.");
-        }
-        List<SongFilterResponseDTO> response = songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
-        return response;
+        return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 
     public List<SongFilterResponseDTO> getLikedSongsByUsername(String username) {
-        List<Song> songs = this.userRepository.findUserByUsername(username).getLikedSongs();
+        User user = this.userRepository.findUserByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("Could not find user " + username);
+        }
+
+        List<Song> songs = user.getLikedSongs();
+
         return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 
