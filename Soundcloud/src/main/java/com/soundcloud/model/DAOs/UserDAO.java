@@ -26,9 +26,9 @@ public class UserDAO {
     public List<FilterResponseUserWithoutPlaylistDTO> getFilteredUsers(FilterRequestUserDTO filterUserDTO) throws SQLException {
         List<FilterResponseUserWithoutPlaylistDTO> filteredUsers = new ArrayList<>();
         String filterQuery = "SELECT u.id, u.username, " +
-                             "COUNT(ufu.followed_id) AS followers, " +
-                             "COUNT(c.owner_id) AS comments, " +
-                             "COUNT(s.owner_id) AS songs " +
+                             "COUNT(DISTINCT ufu.follower_id) AS followers, " +
+                             "COUNT(DISTINCT c.id) AS comments, " +
+                             "COUNT(DISTINCT s.id) AS songs " +
 
                              "FROM users u Left JOIN users_follow_users ufu " +
                              "ON u.id = ufu.followed_id " +
