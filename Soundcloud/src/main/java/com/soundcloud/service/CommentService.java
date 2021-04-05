@@ -82,6 +82,10 @@ public class CommentService {
         return new CommentResponseDTO(comment);
     }
 
+    private int getLikesSumFor (Comment comment) {
+        return comment.getLikers().size() - comment.getDislikers().size();
+    }
+
     @Transactional
     public LikeDislikeResponseDTO setLike(int commentId, int likeValue, User loggedUser) {
         Comment targetComment = commentRepository.findCommentById(commentId);
@@ -93,8 +97,13 @@ public class CommentService {
 
         switch (likeValue) {
             case 1:
-                if (loggedUser.getLikedComments().contains(targetComment)) return new LikeDislikeResponseDTO("Comment left liked.", targetComment.getLikers().size());
-                if (loggedUser.getDislikedComments().contains(targetComment)) setLike(commentId, 0, loggedUser);
+                if (loggedUser.getLikedComments().contains(targetComment)) {
+                    return new LikeDislikeResponseDTO("Comment left liked.", getLikesSumFor(targetComment));
+                }
+                if (loggedUser.getDislikedComments().contains(targetComment)) {
+                    setLike(commentId, 0, loggedUser);
+                }
+
                 loggedUser.getLikedComments().add(targetComment);
                 targetComment.getLikers().add(loggedUser);
                 action = "liked";
@@ -112,12 +121,12 @@ public class CommentService {
                     action = "undisliked";
                 } else {
                     // If comment was previously neutral
-                    return new LikeDislikeResponseDTO("Comment status left at neutral.", targetComment.getLikers().size());
+                    return new LikeDislikeResponseDTO("Comment status left at neutral.", getLikesSumFor(targetComment));
                 }
                 break;
             case -1:
                 if (loggedUser.getDislikedComments().contains(targetComment))
-                    return new LikeDislikeResponseDTO("Comment left disliked.", targetComment.getLikers().size());
+                    return new LikeDislikeResponseDTO("Comment left disliked.", getLikesSumFor(targetComment));
                 if (loggedUser.getLikedComments().contains(targetComment)) setLike(commentId, 0, loggedUser);
                 loggedUser.getDislikedComments().add(targetComment);
                 targetComment.getDislikers().add(loggedUser);
@@ -128,7 +137,7 @@ public class CommentService {
         }
         this.userRepository.save(loggedUser);
         this.commentRepository.save(targetComment);
-        return new LikeDislikeResponseDTO("You successfully " + action + " comment id#" + commentId, targetComment.getLikers().size());
+        return new LikeDislikeResponseDTO("You successfully " + action + " comment id#" + commentId, getLikesSumFor(targetComment));
     }
 
     public CommentResponseDTO editComment(User loggedUser, int commentId, EditCommentRequestDTO requestDTO) {

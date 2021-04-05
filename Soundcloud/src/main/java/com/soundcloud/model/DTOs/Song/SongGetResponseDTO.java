@@ -37,7 +37,7 @@ public class SongGetResponseDTO extends SongUploadResponseDTO {
         }
 
         for (User disliker : song.getDislikers()) {
-            this.likers.add(new UserDTO(disliker));
+            this.dislikers.add(new UserDTO(disliker));
         }
     }
 }

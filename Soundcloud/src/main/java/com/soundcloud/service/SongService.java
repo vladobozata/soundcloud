@@ -158,6 +158,10 @@ public class SongService {
         return songs.stream().map(SongFilterResponseDTO::new).collect(Collectors.toList());
     }
 
+    private int getLikesSumFor (Song song) {
+        return song.getLikers().size() - song.getDislikers().size();
+    }
+
     @Transactional
     public LikeDislikeResponseDTO setLike(int songId, int likeValue, User loggedUser) {
         Song targetSong = this.songRepository.getSongById(songId);
@@ -169,7 +173,7 @@ public class SongService {
 
         switch (likeValue) {
             case 1:
-                if (loggedUser.getLikedSongs().contains(targetSong)) return new LikeDislikeResponseDTO("Song left liked.", targetSong.getLikers().size());
+                if (loggedUser.getLikedSongs().contains(targetSong)) return new LikeDislikeResponseDTO("Song left liked.", getLikesSumFor(targetSong));
                 if (loggedUser.getDislikedSongs().contains(targetSong)) setLike(songId, 0, loggedUser);
                 loggedUser.getLikedSongs().add(targetSong);
                 targetSong.getLikers().add(loggedUser);
@@ -188,11 +192,11 @@ public class SongService {
                     action = "undisliked";
                 } else {
                     // If song was previously neutral
-                    return new LikeDislikeResponseDTO("Song status left at neutral.", targetSong.getLikers().size());
+                    return new LikeDislikeResponseDTO("Song status left at neutral.", getLikesSumFor(targetSong));
                 }
                 break;
             case -1:
-                if (loggedUser.getDislikedSongs().contains(targetSong)) return new LikeDislikeResponseDTO("Song left disliked.", targetSong.getLikers().size());
+                if (loggedUser.getDislikedSongs().contains(targetSong)) return new LikeDislikeResponseDTO("Song left disliked.", getLikesSumFor(targetSong));
                 if (loggedUser.getLikedSongs().contains(targetSong)) setLike(songId, 0, loggedUser);
                 loggedUser.getDislikedSongs().add(targetSong);
                 targetSong.getDislikers().add(loggedUser);
@@ -204,7 +208,7 @@ public class SongService {
 
         this.userRepository.save(loggedUser);
         this.songRepository.save(targetSong);
-        return new LikeDislikeResponseDTO("You successfully " + action + " song id#" + songId, targetSong.getLikers().size());
+        return new LikeDislikeResponseDTO("You successfully " + action + " song id#" + songId, getLikesSumFor(targetSong));
     }
 
     @SneakyThrows
